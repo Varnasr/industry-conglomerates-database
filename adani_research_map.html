@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Adani Group Infrastructure Database (2000-2025)</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, sans-serif; }
+        
+        .top-bar {
+            position: fixed;
+            top: 12px; left: 12px; right: 12px;
+            height: 54px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+        }
+        
+        .logo-section { display: flex; align-items: center; gap: 10px; }
+        
+        .logo-icon {
+            width: 32px; height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 14px;
+        }
+        
+        .logo-text { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+        .logo-text span { color: #667eea; }
+        
+        .info-btn {
+            width: 40px; height: 40px;
+            border-radius: 12px; border: none;
+            background: #f0f2f5; color: #555;
+            font-size: 18px; cursor: pointer;
+        }
+        
+        #map { position: fixed; top: 0; bottom: 0; left: 0; right: 0; z-index: 1; }
+        
+        .filter-pills {
+            position: fixed;
+            top: 78px; left: 0; right: 0;
+            z-index: 1500;
+            padding: 0 12px;
+            display: flex; gap: 8px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        .filter-pills::-webkit-scrollbar { display: none; }
+        
+        .pill {
+            flex-shrink: 0;
+            padding: 10px 16px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px; border: none;
+            font-size: 13px; font-weight: 500; color: #444;
+            cursor: pointer;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+        
+        .pill.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .bottom-panel {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: white;
+            border-radius: 24px 24px 0 0;
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.15);
+            z-index: 1800;
+            transform: translateY(calc(100% - 90px));
+            transition: transform 0.35s ease;
+            max-height: 75vh;
+        }
+        
+        .bottom-panel.expanded { transform: translateY(0); }
+        
+        .panel-handle {
+            width: 48px; height: 5px;
+            background: #ddd; border-radius: 3px;
+            margin: 12px auto 8px;
+        }
+        
+        .panel-header {
+            padding: 8px 20px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .panel-title { font-size: 18px; font-weight: 700; color: #1a1a2e; }
+        
+        .goi-badge {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px; font-weight: 600;
+        }
+        
+        .panel-content {
+            padding: 0 20px 30px;
+            overflow-y: auto;
+            max-height: calc(75vh - 80px);
+        }
+        
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2f5 100%);
+            border-radius: 16px;
+            padding: 14px 10px;
+            text-align: center;
+        }
+        
+        .stat-num { font-size: 26px; font-weight: 700; color: #1a1a2e; }
+        .stat-label { font-size: 10px; color: #888; text-transform: uppercase; margin-top: 4px; }
+        
+        .section { margin-bottom: 20px; }
+        .section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .filter-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        
+        .filter-btn {
+            padding: 12px 18px;
+            border: 2px solid #e8e8e8;
+            background: white;
+            border-radius: 14px;
+            font-size: 13px; font-weight: 500;
+            cursor: pointer; color: #555;
+        }
+        
+        .filter-btn.active {
+            background: #1a1a2e;
+            color: white;
+            border-color: #1a1a2e;
+        }
+        
+        .timeline-container {
+            background: #f8f9ff;
+            border-radius: 16px;
+            padding: 16px;
+        }
+        
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .year-display { font-size: 28px; font-weight: 700; color: #667eea; }
+        .timeline-btns { display: flex; gap: 8px; }
+        
+        .timeline-btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 13px; font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .play-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .reset-btn { background: #e8e8e8; color: #555; }
+        
+        input[type="range"] {
+            width: 100%; height: 8px;
+            -webkit-appearance: none;
+            background: #ddd;
+            border-radius: 4px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 28px; height: 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .live-stats {
+            background: #f8f9ff;
+            border-radius: 16px;
+            padding: 16px;
+            font-size: 13px; color: #555;
+        }
+        .live-stats strong { color: #1a1a2e; }
+        
+        .legend-grid { display: grid; gap: 8px; margin-top: 12px; }
+        .legend-grid.collapsed { display: none; }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px; color: #555;
+        }
+        
+        .legend-dot {
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 3000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal-overlay.hidden { display: none; }
+        
+        .modal-box {
+            background: white;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 420px;
+            max-height: 85vh;
+            overflow: hidden;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #2d2d44 100%);
+            color: white;
+            padding: 28px 24px;
+            text-align: center;
+        }
+        
+        .modal-header h2 { font-size: 22px; margin-bottom: 6px; }
+        .modal-header p { font-size: 13px; opacity: 0.8; }
+        
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            max-height: calc(85vh - 200px);
+        }
+        
+        .highlight-stat {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff8e6 0%, #fff3d6 100%);
+            border-radius: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .highlight-stat .big {
+            font-size: 48px; font-weight: 700;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .highlight-stat .desc { font-size: 13px; color: #666; margin-top: 4px; }
+        
+        .legal-notice {
+            background: #f5f5f5;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 12px; color: #666;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .legal-notice strong { color: #333; }
+        
+        .license-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: #e8f5e9;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .license-badge img { width: 60px; }
+        .license-badge span { font-size: 12px; color: #2e7d32; }
+        
+        .enter-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; border: none;
+            border-radius: 16px;
+            font-size: 16px; font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .leaflet-popup-content-wrapper { border-radius: 16px; }
+        .leaflet-popup-content { margin: 14px 16px; max-width: 280px; }
+        
+        .popup-title {
+            font-size: 15px; font-weight: 700; color: #1a1a2e;
+            margin-bottom: 10px; padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .popup-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 9px; font-weight: 700;
+            text-transform: uppercase;
+            margin-left: 6px;
+        }
+        
+        .badge-goi { background: #fee2e2; color: #dc2626; }
+        .badge-private { background: #dbeafe; color: #2563eb; }
+        .badge-intl { background: #f3e8ff; color: #9333ea; }
+        
+        .popup-row { font-size: 13px; margin: 6px 0; display: flex; }
+        .popup-label { font-weight: 600; color: #888; width: 70px; }
+        
+        .popup-details {
+            font-size: 12px; color: #666;
+            margin-top: 10px; padding-top: 10px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .leaflet-control-zoom { border: none !important; border-radius: 14px !important; overflow: hidden; }
+        .leaflet-control-zoom a { width: 48px !important; height: 48px !important; line-height: 48px !important; font-size: 22px !important; }
+        .leaflet-top.leaflet-right { top: 130px; right: 12px; }
+        
+        .source-link {
+            position: fixed;
+            bottom: 100px; left: 12px;
+            background: rgba(255,255,255,0.95);
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 11px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .source-link a { color: #667eea; text-decoration: none; font-weight: 600; }
+        
+        @media (min-width: 768px) {
+            .top-bar { top: 16px; left: 16px; right: auto; width: 340px; }
+            .filter-pills { top: 86px; left: 16px; right: auto; width: 340px; flex-wrap: wrap; }
+            .bottom-panel {
+                width: 340px; right: auto; left: 16px;
+                top: 140px; bottom: 16px;
+                border-radius: 20px;
+                transform: none !important;
+                max-height: none;
+            }
+            .panel-handle { display: none; }
+            .panel-content { max-height: calc(100vh - 240px); }
+            .leaflet-top.leaflet-right { top: 16px; right: 16px; }
+            .source-link { bottom: 16px; left: 370px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <a href="index.html" class="logo-section" style="text-decoration:none" title="Back to database hub">
+            <div class="logo-icon">A</div>
+            <div class="logo-text">Adani <span>Infra DB</span></div>
+        </a>
+        <button class="info-btn" onclick="showDisclaimer()">ℹ️</button>
+    </div>
+    
+    <div class="filter-pills">
+        <button class="pill active" onclick="setView('global')">🌐 Global</button>
+        <button class="pill" onclick="setView('india')">🇮🇳 India</button>
+        <button class="pill" onclick="setView('intl')">✈️ Int'l</button>
+    </div>
+    
+    <div id="map"></div>
+    
+    <div class="bottom-panel" id="bottomPanel">
+        <div class="panel-handle" onclick="togglePanel()"></div>
+        <div class="panel-header" onclick="togglePanel()">
+            <span class="panel-title">Filters & Data</span>
+            <span class="goi-badge">70.1% GOI</span>
+        </div>
+        <div class="panel-content">
+            <div class="stats-row">
+                <div class="stat-card"><div class="stat-num">325</div><div class="stat-label">Projects</div></div>
+                <div class="stat-card"><div class="stat-num">298</div><div class="stat-label">India</div></div>
+                <div class="stat-card"><div class="stat-num">27</div><div class="stat-label">Int'l</div></div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Filter Data</div>
+                <div class="filter-grid">
+                    <button class="filter-btn active" id="toggleIndia">🇮🇳 India</button>
+                    <button class="filter-btn active" id="toggleIntl">✈️ Int'l</button>
+                    <button class="filter-btn active" id="toggleGOI">🏛️ GOI</button>
+                    <button class="filter-btn active" id="togglePrivate">🏢 Private</button>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Timeline</div>
+                <div class="timeline-container">
+                    <div class="timeline-header">
+                        <span class="year-display" id="yearDisplay">2025</span>
+                        <div class="timeline-btns">
+                            <button class="timeline-btn play-btn" id="playBtn">▶ Play</button>
+                            <button class="timeline-btn reset-btn" id="resetBtn">↺</button>
+                        </div>
+                    </div>
+                    <input type="range" id="yearSlider" min="2000" max="2025" value="2025">
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Live Statistics</div>
+                <div class="live-stats" id="liveStats">Loading...</div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title" onclick="toggleLegend()" style="cursor:pointer">Legend <span id="legendArrow">▼</span></div>
+                <div class="legend-grid" id="legendGrid">
+                    <div class="legend-item"><span class="legend-dot" style="background:#DC143C"></span>Direct Govt Contract/PPP</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#FF4500"></span>Regulatory License</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#FF6347"></span>State Government MoU</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#FFD700"></span>Policy/Regulatory Benefit</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#32CD32"></span>SECI Solar Contract</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#006400"></span>Defence Production License</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#4169E1"></span>Private Acquisition</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#1E90FF"></span>Organic Growth</div>
+                    <div class="legend-item"><span class="legend-dot" style="background:#9932CC"></span>International</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="source-link">Data: <a href="https://github.com/varnasr/adani-infra-db" target="_blank">GitHub</a> · CC BY 4.0</div>
+    
+    <div class="modal-overlay" id="disclaimerModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2>Adani Infrastructure Database</h2>
+                <p>325 Projects · 48 Locations · 2000-2025</p>
+            </div>
+            <div class="modal-body">
+                <div class="highlight-stat">
+                    <div class="big">70.1%</div>
+                    <div class="desc">of Modi-era projects (2014+) received GOI support</div>
+                </div>
+                <div class="legal-notice">
+                    <strong>⚖️ Disclaimer:</strong> Independent research database from public sources. NOT affiliated with Adani Group or GOI. "GOI support" does NOT imply wrongdoing.<br><br>
+                    <strong>🇮🇳 Compliance:</strong> IT Act 2000 §79, RTI Act 2005, Copyright Act §52.
+                </div>
+                <div class="license-badge">
+                    <img src="https://licensebuttons.net/l/by/4.0/88x31.png" alt="CC BY 4.0">
+                    <span><strong>CC BY 4.0</strong> - Free to share</span>
+                </div>
+                <button class="enter-btn" onclick="closeDisclaimer()">View Database →</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const markersData = [{"name": "Mundra Port", "lat": 22.8395, "lng": 69.7032, "sector": "Port", "state": "Gujarat", "year": 2001, "status": "Operational", "details": "India's largest private port, 250+ MMT capacity", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "Dahej Port", "lat": 21.7138, "lng": 72.5619, "sector": "Port", "state": "Gujarat", "year": 2010, "status": "Operational", "details": "LNG terminal, multipurpose port", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "Hazira Port", "lat": 21.1289, "lng": 72.6347, "sector": "Port", "state": "Gujarat", "year": 2012, "status": "Operational", "details": "Multipurpose port near Surat", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "Dhamra Port", "lat": 20.78, "lng": 86.9, "sector": "Port", "state": "Odisha", "year": 2014, "status": "Operational", "details": "Acquired from Tata-L&T JV, \u20b95,500 Cr", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Kattupalli Port", "lat": 13.25, "lng": 80.3333, "sector": "Port", "state": "Tamil Nadu", "year": 2013, "status": "Operational", "details": "Container and bulk cargo", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "Krishnapatnam Port", "lat": 14.2833, "lng": 80.1333, "sector": "Port", "state": "Andhra Pradesh", "year": 2021, "status": "Operational", "details": "75% stake acquisition", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Gangavaram Port", "lat": 17.63, "lng": 83.21, "sector": "Port", "state": "Andhra Pradesh", "year": 2021, "status": "Operational", "details": "58.1% stake from DVS Raju", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Ennore Container Terminal", "lat": 13.22, "lng": 80.32, "sector": "Port", "state": "Tamil Nadu", "year": 2018, "status": "Operational", "details": "Kamarajar Port", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Vizhinjam Port", "lat": 8.38, "lng": 76.94, "sector": "Port", "state": "Kerala", "year": 2015, "status": "Under Construction", "details": "India's first transshipment port", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Gopalpur Port", "lat": 19.27, "lng": 84.91, "sector": "Port", "state": "Odisha", "year": 2024, "status": "Operational", "details": "Acquired, dry bulk cargo", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Mormugao Terminal", "lat": 15.41, "lng": 73.8, "sector": "Port", "state": "Goa", "year": 2015, "status": "Operational", "details": "Coal handling terminal", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Tuna Tekra Terminal", "lat": 22.95, "lng": 70.03, "sector": "Port", "state": "Gujarat", "year": 2017, "status": "Operational", "details": "Kandla Port expansion", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Dighi Port", "lat": 18.22, "lng": 72.92, "sector": "Port", "state": "Maharashtra", "year": 2020, "status": "Operational", "details": "74% stake acquisition", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "NQXT Australia", "lat": -20.05, "lng": 148.25, "sector": "Port", "state": "Queensland, Australia", "year": 2025, "status": "Operational", "details": "50 MTPA coal terminal acquisition", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Mumbai International Airport", "lat": 19.0896, "lng": 72.8656, "sector": "Airport", "state": "Maharashtra", "year": 2021, "status": "Operational", "details": "CSMIA, 74% stake, \u20b918,800 Cr via AEML", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Navi Mumbai International Airport", "lat": 18.98, "lng": 73.03, "sector": "Airport", "state": "Maharashtra", "year": 2017, "status": "Under Construction", "details": "Greenfield, opening Dec 2025", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Ahmedabad Airport", "lat": 23.0767, "lng": 72.63, "sector": "Airport", "state": "Gujarat", "year": 2019, "status": "Operational", "details": "50 year lease from AAI", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Lucknow Airport", "lat": 26.7606, "lng": 80.8893, "sector": "Airport", "state": "Uttar Pradesh", "year": 2019, "status": "Operational", "details": "50 year lease from AAI", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Mangalore Airport", "lat": 12.9616, "lng": 74.89, "sector": "Airport", "state": "Karnataka", "year": 2019, "status": "Operational", "details": "50 year lease from AAI", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Jaipur Airport", "lat": 26.8242, "lng": 75.8122, "sector": "Airport", "state": "Rajasthan", "year": 2019, "status": "Operational", "details": "50 year lease from AAI", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Guwahati Airport", "lat": 26.1067, "lng": 91.5858, "sector": "Airport", "state": "Assam", "year": 2019, "status": "Operational", "details": "50 year lease from AAI", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Thiruvananthapuram Airport", "lat": 8.4828, "lng": 76.92, "sector": "Airport", "state": "Kerala", "year": 2019, "status": "Operational", "details": "50 year lease from AAI", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Mundra Thermal Power", "lat": 22.83, "lng": 69.72, "sector": "Thermal Power", "state": "Gujarat", "year": 2012, "status": "Operational", "details": "4,620 MW ultra mega power plant", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#FFD700"}, {"name": "Tiroda Power", "lat": 21.4, "lng": 79.95, "sector": "Thermal Power", "state": "Maharashtra", "year": 2012, "status": "Operational", "details": "3,300 MW", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#FFD700"}, {"name": "Kawai Power", "lat": 25.05, "lng": 76.05, "sector": "Thermal Power", "state": "Rajasthan", "year": 2013, "status": "Operational", "details": "1,320 MW", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#FFD700"}, {"name": "Udupi Power", "lat": 13.43, "lng": 74.75, "sector": "Thermal Power", "state": "Karnataka", "year": 2010, "status": "Operational", "details": "1,200 MW", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#FFD700"}, {"name": "Raipur Power", "lat": 21.25, "lng": 81.63, "sector": "Thermal Power", "state": "Chhattisgarh", "year": 2015, "status": "Operational", "details": "1,370 MW", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Raigarh Power", "lat": 22.08, "lng": 83.39, "sector": "Thermal Power", "state": "Chhattisgarh", "year": 2019, "status": "Operational", "details": "Acquired GMR unit, 1,370 MW", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Korba Power", "lat": 22.36, "lng": 82.68, "sector": "Thermal Power", "state": "Chhattisgarh", "year": 2020, "status": "Operational", "details": "600 MW", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Godda Thermal Power", "lat": 24.83, "lng": 87.21, "sector": "Thermal Power", "state": "Jharkhand", "year": 2023, "status": "Operational", "details": "1,600 MW, exports to Bangladesh", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Mahan Power", "lat": 24.1, "lng": 82.05, "sector": "Thermal Power", "state": "Madhya Pradesh", "year": 2016, "status": "Operational", "details": "1,200 MW Essar acquisition", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Dahanu Power", "lat": 19.96, "lng": 72.71, "sector": "Thermal Power", "state": "Maharashtra", "year": 2022, "status": "Operational", "details": "AEML, 500 MW", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Assam Thermal Power", "lat": 26.15, "lng": 91.75, "sector": "Thermal Power", "state": "Assam", "year": 2025, "status": "Planned", "details": "3,200 MW ultra super critical, \u20b948,000 Cr MoU", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Jharkhand Expansion", "lat": 24.85, "lng": 87.23, "sector": "Thermal Power", "state": "Jharkhand", "year": 2024, "status": "Under Construction", "details": "Godda Phase 2", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Khavda RE Park", "lat": 23.85, "lng": 69.08, "sector": "Renewable Energy", "state": "Gujarat", "year": 2023, "status": "Operational", "details": "World's largest, 30 GW planned, 5,355 MW operational", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Kamuthi Solar", "lat": 9.35, "lng": 78.42, "sector": "Renewable Energy", "state": "Tamil Nadu", "year": 2016, "status": "Operational", "details": "648 MW, one of world's largest", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Pavagada Solar Park", "lat": 14.1, "lng": 77.27, "sector": "Renewable Energy", "state": "Karnataka", "year": 2019, "status": "Operational", "details": "2 GW capacity, AGEL has major stake", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Bhadla Solar Park", "lat": 27.52, "lng": 71.91, "sector": "Renewable Energy", "state": "Rajasthan", "year": 2020, "status": "Operational", "details": "AGEL units, part of 2,245 MW park", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Pokhran Solar", "lat": 26.92, "lng": 71.92, "sector": "Renewable Energy", "state": "Rajasthan", "year": 2021, "status": "Under Construction", "details": "1.5 GW planned", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Jaisalmer Wind-Solar", "lat": 26.9157, "lng": 70.9083, "sector": "Renewable Energy", "state": "Rajasthan", "year": 2020, "status": "Operational", "details": "Hybrid projects, 2,140 MW cluster", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Kutch Solar", "lat": 23.7, "lng": 70.5, "sector": "Renewable Energy", "state": "Gujarat", "year": 2018, "status": "Operational", "details": "Multiple projects", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Anantapur Solar", "lat": 14.68, "lng": 77.6, "sector": "Renewable Energy", "state": "Andhra Pradesh", "year": 2019, "status": "Operational", "details": "Part of 15 GW AP commitment", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Kadapa Solar", "lat": 14.47, "lng": 78.82, "sector": "Renewable Energy", "state": "Andhra Pradesh", "year": 2020, "status": "Operational", "details": "Multiple units", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Kurnool Solar", "lat": 15.83, "lng": 78.05, "sector": "Renewable Energy", "state": "Andhra Pradesh", "year": 2018, "status": "Operational", "details": "Part of SECI projects", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Raichur Solar", "lat": 16.2, "lng": 77.37, "sector": "Renewable Energy", "state": "Karnataka", "year": 2019, "status": "Operational", "details": "Karnataka DISCOM", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Bellary Wind", "lat": 15.14, "lng": 76.92, "sector": "Renewable Energy", "state": "Karnataka", "year": 2018, "status": "Operational", "details": "Wind farm", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Davangere Solar", "lat": 14.46, "lng": 75.92, "sector": "Renewable Energy", "state": "Karnataka", "year": 2020, "status": "Operational", "details": "Karnataka projects", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "MP Solar Projects", "lat": 23.25, "lng": 77.4, "sector": "Renewable Energy", "state": "Madhya Pradesh", "year": 2019, "status": "Operational", "details": "Multiple units, Rewa region", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "UP Solar Projects", "lat": 26.85, "lng": 80.95, "sector": "Renewable Energy", "state": "Uttar Pradesh", "year": 2020, "status": "Operational", "details": "Multiple UPNEDA projects", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Telangana Solar", "lat": 17.38, "lng": 78.49, "sector": "Renewable Energy", "state": "Telangana", "year": 2019, "status": "Operational", "details": "State DISCOM", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Maharashtra Solar", "lat": 19.76, "lng": 75.5, "sector": "Renewable Energy", "state": "Maharashtra", "year": 2020, "status": "Operational", "details": "MSEDCL projects", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Chhattisgarh Solar", "lat": 21.27, "lng": 81.87, "sector": "Renewable Energy", "state": "Chhattisgarh", "year": 2021, "status": "Operational", "details": "CSPDCL projects", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Punjab Solar", "lat": 30.79, "lng": 75.84, "sector": "Renewable Energy", "state": "Punjab", "year": 2021, "status": "Operational", "details": "PSPCL projects", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Gujarat Wind", "lat": 22.3, "lng": 70.8, "sector": "Renewable Energy", "state": "Gujarat", "year": 2017, "status": "Operational", "details": "Multiple wind farms", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Tamil Nadu Wind", "lat": 8.72, "lng": 77.75, "sector": "Renewable Energy", "state": "Tamil Nadu", "year": 2018, "status": "Operational", "details": "Southern TN wind corridor", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Rajasthan Wind", "lat": 27.02, "lng": 70.66, "sector": "Renewable Energy", "state": "Rajasthan", "year": 2019, "status": "Operational", "details": "Jaisalmer-Barmer region", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "SB Energy Gujarat", "lat": 23.5, "lng": 70.5, "sector": "Renewable Energy", "state": "Gujarat", "year": 2021, "status": "Operational", "details": "Acquired from SoftBank, $3.5B", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "SB Energy Rajasthan", "lat": 27.2, "lng": 71.0, "sector": "Renewable Energy", "state": "Rajasthan", "year": 2021, "status": "Operational", "details": "Acquired from SoftBank", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "SB Energy Andhra", "lat": 14.5, "lng": 78.0, "sector": "Renewable Energy", "state": "Andhra Pradesh", "year": 2021, "status": "Operational", "details": "Acquired from SoftBank", "support_type": "SECI Solar Contract", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#32CD32"}, {"name": "Chitravathi PSP", "lat": 14.1, "lng": 77.5, "sector": "Pumped Storage", "state": "Andhra Pradesh", "year": 2024, "status": "Under Construction", "details": "500 MW, first PSP project", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Gandikota PSP", "lat": 14.82, "lng": 78.29, "sector": "Pumped Storage", "state": "Andhra Pradesh", "year": 2024, "status": "Under Construction", "details": "1,800 MW", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Tarali PSP", "lat": 17.05, "lng": 73.85, "sector": "Pumped Storage", "state": "Maharashtra", "year": 2024, "status": "Under Construction", "details": "1,500 MW, Satara district", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Patgaon PSP", "lat": 16.8, "lng": 73.7, "sector": "Pumped Storage", "state": "Maharashtra", "year": 2025, "status": "Planned", "details": "Part of \u20b960,000 Cr Western Ghats MoU", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Koyna-Nivakane PSP", "lat": 17.4, "lng": 73.75, "sector": "Pumped Storage", "state": "Maharashtra", "year": 2025, "status": "Planned", "details": "2,450 MW, Satara", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Warasgaon PSP", "lat": 18.45, "lng": 73.4, "sector": "Pumped Storage", "state": "Maharashtra", "year": 2025, "status": "Planned", "details": "Pune district", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Malsej Ghat PSP", "lat": 19.65, "lng": 73.78, "sector": "Pumped Storage", "state": "Maharashtra", "year": 2025, "status": "Planned", "details": "Pune district", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Panaura PSP", "lat": 24.2, "lng": 83.05, "sector": "Pumped Storage", "state": "Uttar Pradesh", "year": 2025, "status": "Awarded", "details": "1,250 MW, Sonbhadra, 40-year PPA", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Koyabestagudem PSP", "lat": 18.0, "lng": 80.0, "sector": "Pumped Storage", "state": "Telangana", "year": 2025, "status": "Planned", "details": "850 MW, MoU 2024", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Nacharam PSP", "lat": 17.5, "lng": 79.5, "sector": "Pumped Storage", "state": "Telangana", "year": 2025, "status": "Planned", "details": "500 MW, MoU 2024", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Tamil Nadu PSP 1", "lat": 11.5, "lng": 77.0, "sector": "Pumped Storage", "state": "Tamil Nadu", "year": 2025, "status": "Planned", "details": "Part of \u20b924,500 Cr MoU, 3 projects", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Assam PSP", "lat": 26.0, "lng": 92.5, "sector": "Pumped Storage", "state": "Assam", "year": 2025, "status": "Awarded", "details": "2,700 MW combined, \u20b915,000 Cr", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Ambuja - Ambujanagar", "lat": 20.91, "lng": 70.41, "sector": "Cement", "state": "Gujarat", "year": 2022, "status": "Operational", "details": "Kodinar, 5 MTPA integrated", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Ambuja - Bhatapara", "lat": 21.73, "lng": 81.95, "sector": "Cement", "state": "Chhattisgarh", "year": 2022, "status": "Operational", "details": "6.5 MTPA integrated", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Ambuja - Rabriyawas", "lat": 25.6, "lng": 73.56, "sector": "Cement", "state": "Rajasthan", "year": 2022, "status": "Operational", "details": "Pali district, 3.5 MTPA", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Ambuja - Maratha", "lat": 19.96, "lng": 79.3, "sector": "Cement", "state": "Maharashtra", "year": 2022, "status": "Operational", "details": "Chandrapur, 4 MTPA", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Ambuja - Darlaghat", "lat": 31.08, "lng": 76.87, "sector": "Cement", "state": "Himachal Pradesh", "year": 2022, "status": "Operational", "details": "Solan, 2.5 MTPA", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Ambuja - Ropar", "lat": 30.97, "lng": 76.53, "sector": "Cement", "state": "Punjab", "year": 2022, "status": "Operational", "details": "Grinding unit", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Ambuja - Sankrail", "lat": 22.42, "lng": 88.16, "sector": "Cement", "state": "West Bengal", "year": 2022, "status": "Operational", "details": "Grinding unit", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Ambuja - Farakka", "lat": 24.81, "lng": 87.91, "sector": "Cement", "state": "West Bengal", "year": 2022, "status": "Operational", "details": "Grinding unit", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Ambuja - Roorkee", "lat": 29.8543, "lng": 77.888, "sector": "Cement", "state": "Uttarakhand", "year": 2022, "status": "Operational", "details": "Grinding unit", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Ambuja - Nalagarh", "lat": 31.04, "lng": 76.72, "sector": "Cement", "state": "Himachal Pradesh", "year": 2022, "status": "Operational", "details": "Clinker unit", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Ambuja - Bathinda", "lat": 30.21, "lng": 74.95, "sector": "Cement", "state": "Punjab", "year": 2023, "status": "Operational", "details": "Grinding unit expansion", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Ambuja - Rajgangpur", "lat": 22.38, "lng": 84.62, "sector": "Cement", "state": "Odisha", "year": 2023, "status": "Operational", "details": "Grinding unit", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Ambuja - Bihar Greenfield", "lat": 25.6, "lng": 85.1, "sector": "Cement", "state": "Bihar", "year": 2025, "status": "Under Construction", "details": "6 MTPA, \u20b91,600 Cr", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Ambuja - Tamil Nadu", "lat": 11.5, "lng": 78.0, "sector": "Cement", "state": "Tamil Nadu", "year": 2025, "status": "Planned", "details": "Part of \u20b93,500 Cr MoU, 3 grinding units", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Wadi", "lat": 17.06, "lng": 76.99, "sector": "Cement", "state": "Karnataka", "year": 2022, "status": "Operational", "details": "Gulbarga, 4.5 MTPA", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Kymore", "lat": 24.04, "lng": 80.59, "sector": "Cement", "state": "Madhya Pradesh", "year": 2022, "status": "Operational", "details": "4 MTPA", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Jamul", "lat": 21.21, "lng": 81.42, "sector": "Cement", "state": "Chhattisgarh", "year": 2022, "status": "Operational", "details": "4.4 MTPA", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Chaibasa", "lat": 22.55, "lng": 85.81, "sector": "Cement", "state": "Jharkhand", "year": 2022, "status": "Operational", "details": "2.3 MTPA", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Lakheri", "lat": 25.66, "lng": 76.17, "sector": "Cement", "state": "Rajasthan", "year": 2022, "status": "Operational", "details": "2.5 MTPA", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Gagal", "lat": 32.0, "lng": 76.25, "sector": "Cement", "state": "Himachal Pradesh", "year": 2022, "status": "Operational", "details": "Bilaspur, 2.6 MTPA", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Sindri", "lat": 23.87, "lng": 86.35, "sector": "Cement", "state": "Jharkhand", "year": 2022, "status": "Operational", "details": "2.4 MTPA", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Tikaria", "lat": 25.46, "lng": 82.01, "sector": "Cement", "state": "Uttar Pradesh", "year": 2022, "status": "Operational", "details": "3.2 MTPA", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Kudithini", "lat": 15.22, "lng": 76.42, "sector": "Cement", "state": "Karnataka", "year": 2022, "status": "Operational", "details": "Bellary, 2.8 MTPA", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Bargarh", "lat": 21.33, "lng": 83.62, "sector": "Cement", "state": "Odisha", "year": 2022, "status": "Operational", "details": "3.3 MTPA", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Madukkarai", "lat": 10.9, "lng": 76.96, "sector": "Cement", "state": "Tamil Nadu", "year": 2022, "status": "Operational", "details": "Coimbatore, 2.1 MTPA", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Thondebhavi", "lat": 13.58, "lng": 77.56, "sector": "Cement", "state": "Karnataka", "year": 2022, "status": "Operational", "details": "Grinding unit", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Vizag", "lat": 17.72, "lng": 83.23, "sector": "Cement", "state": "Andhra Pradesh", "year": 2022, "status": "Operational", "details": "Grinding unit", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Damodhar", "lat": 23.62, "lng": 87.07, "sector": "Cement", "state": "West Bengal", "year": 2022, "status": "Operational", "details": "Grinding unit", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Kundanganj", "lat": 25.5, "lng": 83.0, "sector": "Cement", "state": "Uttar Pradesh", "year": 2022, "status": "Operational", "details": "Grinding unit", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Thane", "lat": 19.21, "lng": 72.97, "sector": "Cement", "state": "Maharashtra", "year": 2022, "status": "Operational", "details": "Grinding unit", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Chanda", "lat": 19.95, "lng": 79.29, "sector": "Cement", "state": "Maharashtra", "year": 2022, "status": "Operational", "details": "Chandrapur, 3 MTPA", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "ACC - Telangana Greenfield", "lat": 17.8, "lng": 79.0, "sector": "Cement", "state": "Telangana", "year": 2025, "status": "Planned", "details": "6 MTPA, \u20b91,400 Cr MoU", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Sanghi Industries", "lat": 23.05, "lng": 68.75, "sector": "Cement", "state": "Gujarat", "year": 2024, "status": "Operational", "details": "Kutch, 6.6 MTPA, \u20b95,000 Cr", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Penna Cement - Tandur", "lat": 17.24, "lng": 77.58, "sector": "Cement", "state": "Telangana", "year": 2024, "status": "Operational", "details": "\u20b910,422 Cr acquisition", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Penna Cement - Gannavaram", "lat": 16.53, "lng": 80.55, "sector": "Cement", "state": "Andhra Pradesh", "year": 2024, "status": "Operational", "details": "Part of Penna deal", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Penna Cement - Jodhpur", "lat": 26.28, "lng": 73.02, "sector": "Cement", "state": "Rajasthan", "year": 2024, "status": "Operational", "details": "Part of Penna deal", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "India Cements - stake", "lat": 10.93, "lng": 79.14, "sector": "Cement", "state": "Tamil Nadu", "year": 2024, "status": "Stake Acquisition", "details": "46.8% stake, ICL headquarters", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Orient Cement - acquisition", "lat": 19.0, "lng": 73.0, "sector": "Cement", "state": "Maharashtra", "year": 2025, "status": "Planned", "details": "Acquisition under discussion", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Mundra-Mohindergarh HVDC", "lat": 22.8, "lng": 75.0, "sector": "Transmission", "state": "Gujarat-Haryana", "year": 2015, "status": "Operational", "details": "2,500 MW capacity, 990 km", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Mundra-Delhi Line", "lat": 25.0, "lng": 74.0, "sector": "Transmission", "state": "Gujarat-Delhi", "year": 2016, "status": "Operational", "details": "Power evacuation", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Western Region Line", "lat": 20.0, "lng": 74.0, "sector": "Transmission", "state": "Maharashtra", "year": 2018, "status": "Operational", "details": "WRSS project", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "MP Transmission", "lat": 23.0, "lng": 77.0, "sector": "Transmission", "state": "Madhya Pradesh", "year": 2019, "status": "Operational", "details": "State grid", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Rajasthan Transmission", "lat": 27.0, "lng": 73.0, "sector": "Transmission", "state": "Rajasthan", "year": 2020, "status": "Operational", "details": "RE evacuation", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Chhattisgarh Transmission", "lat": 21.5, "lng": 82.0, "sector": "Transmission", "state": "Chhattisgarh", "year": 2020, "status": "Operational", "details": "State grid", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Mahan-Sipat", "lat": 22.5, "lng": 82.0, "sector": "Transmission", "state": "MP-Chhattisgarh", "year": 2024, "status": "Operational", "details": "Essar acquisition", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Khavda Evacuation Phase 1", "lat": 23.85, "lng": 69.1, "sector": "Transmission", "state": "Gujarat", "year": 2023, "status": "Operational", "details": "30 GW park evacuation", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Khavda Evacuation 7GW", "lat": 23.85, "lng": 69.08, "sector": "Transmission", "state": "Gujarat", "year": 2025, "status": "Under Construction", "details": "AESL, 7 GW network", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Bhadla-Fatehpur HVDC", "lat": 27.0, "lng": 79.0, "sector": "Transmission", "state": "Rajasthan-UP", "year": 2025, "status": "Awarded", "details": "\u20b925,000 Cr, largest ever order", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Warora-Kurnool Line", "lat": 18.0, "lng": 78.0, "sector": "Transmission", "state": "Maharashtra-AP", "year": 2021, "status": "Operational", "details": "Inter-regional", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "NRSS Transmission", "lat": 28.0, "lng": 77.0, "sector": "Transmission", "state": "Northern Region", "year": 2022, "status": "Operational", "details": "System strengthening", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "AEML Mumbai Network", "lat": 19.08, "lng": 72.88, "sector": "Transmission", "state": "Maharashtra", "year": 2021, "status": "Operational", "details": "3 million consumers", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Gujarat RE Evacuation", "lat": 23.0, "lng": 70.0, "sector": "Transmission", "state": "Gujarat", "year": 2024, "status": "Under Construction", "details": "Green hydrogen manufacturing", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Rajasthan Solar Corridor", "lat": 26.5, "lng": 72.0, "sector": "Transmission", "state": "Rajasthan", "year": 2024, "status": "Planned", "details": "Bhadla park evacuation", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Ahmedabad CGD", "lat": 23.0225, "lng": 72.5714, "sector": "City Gas", "state": "Gujarat", "year": 2004, "status": "Operational", "details": "First ATGL network", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#FF4500"}, {"name": "Vadodara CGD", "lat": 22.3072, "lng": 73.1812, "sector": "City Gas", "state": "Gujarat", "year": 2006, "status": "Operational", "details": "Major Gujarat city", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#FF4500"}, {"name": "Faridabad CGD", "lat": 28.4089, "lng": 77.3178, "sector": "City Gas", "state": "Haryana", "year": 2008, "status": "Operational", "details": "NCR region", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#FF4500"}, {"name": "Khurja CGD", "lat": 28.25, "lng": 77.85, "sector": "City Gas", "state": "Uttar Pradesh", "year": 2010, "status": "Operational", "details": "UP expansion", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#FF4500"}, {"name": "Prayagraj CGD", "lat": 25.4358, "lng": 81.8463, "sector": "City Gas", "state": "Uttar Pradesh", "year": 2012, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#FF4500"}, {"name": "Chandigarh CGD", "lat": 30.7333, "lng": 76.7794, "sector": "City Gas", "state": "Chandigarh", "year": 2013, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#FF4500"}, {"name": "Panipat CGD", "lat": 29.3909, "lng": 76.9635, "sector": "City Gas", "state": "Haryana", "year": 2014, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Udham Singh Nagar CGD", "lat": 28.95, "lng": 79.5, "sector": "City Gas", "state": "Uttarakhand", "year": 2014, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Daman CGD", "lat": 20.417, "lng": 72.8508, "sector": "City Gas", "state": "Daman", "year": 2015, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Dharwad CGD", "lat": 15.4589, "lng": 75.0078, "sector": "City Gas", "state": "Karnataka", "year": 2015, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Ernakulam CGD", "lat": 9.9816, "lng": 76.2999, "sector": "City Gas", "state": "Kerala", "year": 2015, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "South Goa CGD", "lat": 15.2993, "lng": 74.124, "sector": "City Gas", "state": "Goa", "year": 2016, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Bulandshahr CGD", "lat": 28.407, "lng": 77.8498, "sector": "City Gas", "state": "Uttar Pradesh", "year": 2016, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Haridwar CGD", "lat": 29.9457, "lng": 78.1642, "sector": "City Gas", "state": "Uttarakhand", "year": 2018, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "North Goa CGD", "lat": 15.4909, "lng": 73.8278, "sector": "City Gas", "state": "Goa", "year": 2019, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Kota CGD", "lat": 25.2138, "lng": 75.8648, "sector": "City Gas", "state": "Rajasthan", "year": 2019, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Bhopal CGD", "lat": 23.2599, "lng": 77.4126, "sector": "City Gas", "state": "Madhya Pradesh", "year": 2020, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Jabalpur CGD", "lat": 23.1815, "lng": 79.9864, "sector": "City Gas", "state": "Madhya Pradesh", "year": 2020, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Gwalior CGD", "lat": 26.2183, "lng": 78.1828, "sector": "City Gas", "state": "Madhya Pradesh", "year": 2020, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Ujjain CGD", "lat": 23.1765, "lng": 75.7885, "sector": "City Gas", "state": "Madhya Pradesh", "year": 2021, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Yavatmal CGD", "lat": 20.3899, "lng": 78.1307, "sector": "City Gas", "state": "Maharashtra", "year": 2021, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Parbhani CGD", "lat": 19.2583, "lng": 76.7676, "sector": "City Gas", "state": "Maharashtra", "year": 2021, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Nagpur CGD", "lat": 21.1458, "lng": 79.0882, "sector": "City Gas", "state": "Maharashtra", "year": 2021, "status": "Operational", "details": "IOAGPL JV", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Muzaffarpur CGD", "lat": 26.1197, "lng": 85.391, "sector": "City Gas", "state": "Bihar", "year": 2018, "status": "Under Development", "details": "Round 9", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Patna CGD", "lat": 25.5941, "lng": 85.1376, "sector": "City Gas", "state": "Bihar", "year": 2018, "status": "Under Development", "details": "Round 9", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Bhagalpur CGD", "lat": 25.25, "lng": 86.9833, "sector": "City Gas", "state": "Bihar", "year": 2018, "status": "Under Development", "details": "Round 9", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Ludhiana CGD", "lat": 30.901, "lng": 75.8573, "sector": "City Gas", "state": "Punjab", "year": 2018, "status": "Under Development", "details": "Round 9", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Hoshiarpur CGD", "lat": 31.531, "lng": 75.911, "sector": "City Gas", "state": "Punjab", "year": 2019, "status": "Under Development", "details": "Round 9", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Coimbatore CGD", "lat": 11.0168, "lng": 76.9558, "sector": "City Gas", "state": "Tamil Nadu", "year": 2019, "status": "Under Development", "details": "Round 9", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Salem CGD", "lat": 11.6643, "lng": 78.146, "sector": "City Gas", "state": "Tamil Nadu", "year": 2019, "status": "Under Development", "details": "Round 9", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Tiruppur CGD", "lat": 11.1085, "lng": 77.3411, "sector": "City Gas", "state": "Tamil Nadu", "year": 2019, "status": "Under Development", "details": "Round 9", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Karur CGD", "lat": 10.9601, "lng": 78.0766, "sector": "City Gas", "state": "Tamil Nadu", "year": 2019, "status": "Under Development", "details": "Round 9", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Namakkal CGD", "lat": 11.2189, "lng": 78.1674, "sector": "City Gas", "state": "Tamil Nadu", "year": 2019, "status": "Under Development", "details": "Round 9", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Tiruchirappalli CGD", "lat": 10.7905, "lng": 78.7047, "sector": "City Gas", "state": "Tamil Nadu", "year": 2019, "status": "Under Development", "details": "Round 9", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Tirunelveli CGD", "lat": 8.728, "lng": 77.7101, "sector": "City Gas", "state": "Tamil Nadu", "year": 2019, "status": "Under Development", "details": "Round 9", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Thoothukudi CGD", "lat": 8.7642, "lng": 78.1348, "sector": "City Gas", "state": "Tamil Nadu", "year": 2019, "status": "Under Development", "details": "Round 9", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Jalgaon CGD", "lat": 21.0077, "lng": 75.5626, "sector": "City Gas", "state": "Maharashtra", "year": 2020, "status": "Under Development", "details": "Round 10", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Nanded CGD", "lat": 19.1383, "lng": 77.321, "sector": "City Gas", "state": "Maharashtra", "year": 2020, "status": "Under Development", "details": "Round 10", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Latur CGD", "lat": 18.4088, "lng": 76.5604, "sector": "City Gas", "state": "Maharashtra", "year": 2020, "status": "Under Development", "details": "Round 10", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Osmanabad CGD", "lat": 18.186, "lng": 76.0419, "sector": "City Gas", "state": "Maharashtra", "year": 2020, "status": "Under Development", "details": "Round 10", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Sangli CGD", "lat": 16.8524, "lng": 74.5815, "sector": "City Gas", "state": "Maharashtra", "year": 2020, "status": "Under Development", "details": "Round 10", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Satara CGD", "lat": 17.69, "lng": 73.99, "sector": "City Gas", "state": "Maharashtra", "year": 2020, "status": "Under Development", "details": "Round 10", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Kalaburagi CGD", "lat": 17.3297, "lng": 76.8343, "sector": "City Gas", "state": "Karnataka", "year": 2022, "status": "Under Development", "details": "Round 11", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Bellary CGD", "lat": 15.1394, "lng": 76.9214, "sector": "City Gas", "state": "Karnataka", "year": 2022, "status": "Under Development", "details": "Round 11", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Raichur CGD", "lat": 16.212, "lng": 77.3439, "sector": "City Gas", "state": "Karnataka", "year": 2022, "status": "Under Development", "details": "Round 11", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Bidar CGD", "lat": 17.9138, "lng": 77.53, "sector": "City Gas", "state": "Karnataka", "year": 2022, "status": "Under Development", "details": "Round 11", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Koppal CGD", "lat": 15.3475, "lng": 76.1551, "sector": "City Gas", "state": "Karnataka", "year": 2022, "status": "Under Development", "details": "Round 11", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Yadgir CGD", "lat": 16.7696, "lng": 77.1375, "sector": "City Gas", "state": "Karnataka", "year": 2022, "status": "Under Development", "details": "Round 11", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Jalandhar CGD", "lat": 31.326, "lng": 75.5762, "sector": "City Gas", "state": "Punjab", "year": 2024, "status": "Under Development", "details": "Round 11, transferred to ATGL", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Raipur CGD", "lat": 21.2514, "lng": 81.6296, "sector": "City Gas", "state": "Chhattisgarh", "year": 2022, "status": "Under Development", "details": "Round 11", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Bilaspur CGD", "lat": 22.0796, "lng": 82.1391, "sector": "City Gas", "state": "Chhattisgarh", "year": 2022, "status": "Under Development", "details": "Round 11", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Durg CGD", "lat": 21.1904, "lng": 81.2849, "sector": "City Gas", "state": "Chhattisgarh", "year": 2022, "status": "Under Development", "details": "Round 11", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Korba CGD", "lat": 22.3595, "lng": 82.7501, "sector": "City Gas", "state": "Chhattisgarh", "year": 2022, "status": "Under Development", "details": "Round 11", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Raigarh CGD", "lat": 21.9, "lng": 83.4, "sector": "City Gas", "state": "Chhattisgarh", "year": 2022, "status": "Under Development", "details": "Round 11", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Rajnandgaon CGD", "lat": 21.0972, "lng": 81.0289, "sector": "City Gas", "state": "Chhattisgarh", "year": 2022, "status": "Under Development", "details": "Round 11", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "Mahasamund CGD", "lat": 21.1, "lng": 82.09, "sector": "City Gas", "state": "Chhattisgarh", "year": 2022, "status": "Under Development", "details": "Round 11", "support_type": "Regulatory License (PNGRB/AAI/etc)", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF4500"}, {"name": "AdaniConneX Chennai", "lat": 13.0827, "lng": 80.2707, "sector": "Data Center", "state": "Tamil Nadu", "year": 2022, "status": "Operational", "details": "17 MW, first facility", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "AdaniConneX Noida", "lat": 28.5355, "lng": 77.391, "sector": "Data Center", "state": "Uttar Pradesh", "year": 2023, "status": "Operational", "details": "10 MW", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "AdaniConneX Hyderabad", "lat": 17.385, "lng": 78.4867, "sector": "Data Center", "state": "Telangana", "year": 2023, "status": "Operational", "details": "9.6 MW", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "AdaniConneX Navi Mumbai", "lat": 19.0368, "lng": 73.0151, "sector": "Data Center", "state": "Maharashtra", "year": 2024, "status": "Under Construction", "details": "Part of \u20b950,000 Cr MoU", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "AdaniConneX Pune", "lat": 18.5204, "lng": 73.8567, "sector": "Data Center", "state": "Maharashtra", "year": 2024, "status": "Under Construction", "details": "9.6 MW", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "AdaniConneX Vizag", "lat": 17.6868, "lng": 83.2185, "sector": "Data Center", "state": "Andhra Pradesh", "year": 2025, "status": "Planned", "details": "Google AI partnership, $15B tech park", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "AdaniConneX Tamil Nadu", "lat": 13.05, "lng": 80.25, "sector": "Data Center", "state": "Tamil Nadu", "year": 2025, "status": "Planned", "details": "\u20b913,200 Cr MoU, 7 years", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "AdaniConneX Chandanvelly", "lat": 17.25, "lng": 78.35, "sector": "Data Center", "state": "Telangana", "year": 2025, "status": "Planned", "details": "100 MW, \u20b95,000 Cr MoU", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Adani-Elbit UAV Complex", "lat": 17.44, "lng": 78.35, "sector": "Defence", "state": "Telangana", "year": 2018, "status": "Operational", "details": "Hyderabad, India's first private UAV plant", "support_type": "Defence Production License", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#006400"}, {"name": "Small Arms Manufacturing", "lat": 23.15, "lng": 77.65, "sector": "Defence", "state": "Madhya Pradesh", "year": 2021, "status": "Operational", "details": "IWI weapons, \u20b91,000 Cr+ orders", "support_type": "Defence Production License", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#006400"}, {"name": "Ammunition Complex", "lat": 26.45, "lng": 80.35, "sector": "Defence", "state": "Uttar Pradesh", "year": 2024, "status": "Operational", "details": "Kanpur, 500 acres, 150M rounds/year", "support_type": "Defence Production License", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#006400"}, {"name": "Missiles Complex", "lat": 26.47, "lng": 80.36, "sector": "Defence", "state": "Uttar Pradesh", "year": 2024, "status": "Operational", "details": "UP Defence Corridor", "support_type": "Defence Production License", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#006400"}, {"name": "Air Works MRO Hosur", "lat": 12.74, "lng": 77.83, "sector": "Defence", "state": "Tamil Nadu", "year": 2024, "status": "Operational", "details": "\u20b9400 Cr acquisition, 85.8% stake", "support_type": "Defence Production License", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#006400"}, {"name": "Air Works MRO Mumbai", "lat": 19.0886, "lng": 72.8679, "sector": "Defence", "state": "Maharashtra", "year": 2024, "status": "Operational", "details": "Part of Air Works acquisition", "support_type": "Defence Production License", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#006400"}, {"name": "Adani Aerospace Park", "lat": 17.45, "lng": 78.36, "sector": "Defence", "state": "Telangana", "year": 2020, "status": "Operational", "details": "Aerospace manufacturing hub", "support_type": "Defence Production License", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#006400"}, {"name": "Counter Drone Systems", "lat": 17.46, "lng": 78.37, "sector": "Defence", "state": "Telangana", "year": 2025, "status": "Under Construction", "details": "\u20b91,000 Cr MoU, with DRDO", "support_type": "Defence Production License", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#006400"}, {"name": "FSTC Flight Training", "lat": 12.95, "lng": 77.6, "sector": "Defence", "state": "Karnataka", "year": 2025, "status": "Acquired", "details": "\u20b9820 Cr, India's largest flight training", "support_type": "Defence Production License", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#006400"}, {"name": "Sonobuoys Manufacturing", "lat": 17.7, "lng": 83.3, "sector": "Defence", "state": "Andhra Pradesh", "year": 2025, "status": "Planned", "details": "Anti-submarine warfare, Sparton JV", "support_type": "Defence Production License", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#006400"}, {"name": "Ganga Expressway", "lat": 27.18, "lng": 80.5, "sector": "Roads", "state": "Uttar Pradesh", "year": 2022, "status": "Under Construction", "details": "464 km, \u20b97,500 Cr, Meerut-Prayagraj", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "NH-19 Panagarh-Palsit", "lat": 23.3, "lng": 87.5, "sector": "Roads", "state": "West Bengal", "year": 2021, "status": "Operational", "details": "68 km BOT, \u20b92,020 Cr", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "NH-130 Badakumari-Karki", "lat": 20.0, "lng": 84.0, "sector": "Roads", "state": "Odisha", "year": 2022, "status": "Operational", "details": "HAM, \u20b91,169 Cr", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Kerala TOT Package", "lat": 10.0, "lng": 76.5, "sector": "Roads", "state": "Kerala", "year": 2020, "status": "Operational", "details": "Multiple stretches", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Telangana Road Package", "lat": 17.5, "lng": 78.5, "sector": "Roads", "state": "Telangana", "year": 2021, "status": "Operational", "details": "HAM project", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "MP Road Package", "lat": 23.5, "lng": 77.5, "sector": "Roads", "state": "Madhya Pradesh", "year": 2021, "status": "Operational", "details": "HAM project", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Gujarat TOT Package", "lat": 22.5, "lng": 72.0, "sector": "Roads", "state": "Gujarat", "year": 2020, "status": "Operational", "details": "Multiple stretches", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Nagpur Highways", "lat": 21.15, "lng": 79.1, "sector": "Roads", "state": "Maharashtra", "year": 2023, "status": "Under Construction", "details": "100+ km constructed", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Rajasthan Expressway", "lat": 26.5, "lng": 74.5, "sector": "Roads", "state": "Rajasthan", "year": 2024, "status": "Under Construction", "details": "NHAI project", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "UP Additional Roads", "lat": 26.8, "lng": 81.0, "sector": "Roads", "state": "Uttar Pradesh", "year": 2024, "status": "Under Construction", "details": "Multiple HAM projects", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "MMLP Patli ICD", "lat": 28.23, "lng": 77.01, "sector": "Logistics", "state": "Haryana", "year": 2009, "status": "Operational", "details": "NCR hub, rail connected", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "No", "color": "#1E90FF"}, {"name": "MMLP Tumb ICD", "lat": 20.27, "lng": 73.01, "sector": "Logistics", "state": "Dadra Nagar Haveli", "year": 2022, "status": "Operational", "details": "Navkar acquisition", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "MMLP Kilaraipur ICD", "lat": 30.85, "lng": 76.0, "sector": "Logistics", "state": "Punjab", "year": 2017, "status": "Operational", "details": "Ludhiana, 77 acres", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "MMLP Nagpur ICD", "lat": 21.15, "lng": 79.05, "sector": "Logistics", "state": "Maharashtra", "year": 2018, "status": "Operational", "details": "Central India hub", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "MMLP Kishangarh ICD", "lat": 26.59, "lng": 74.86, "sector": "Logistics", "state": "Rajasthan", "year": 2025, "status": "Operational", "details": "100 acres, DFC connected", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "MMLP Malur", "lat": 13.0, "lng": 77.94, "sector": "Logistics", "state": "Karnataka", "year": 2020, "status": "Operational", "details": "Bangalore region", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "MMLP Taloja", "lat": 19.08, "lng": 73.12, "sector": "Logistics", "state": "Maharashtra", "year": 2019, "status": "Operational", "details": "Mumbai region", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "MMLP Kanech POL", "lat": 22.5, "lng": 72.8, "sector": "Logistics", "state": "Gujarat", "year": 2020, "status": "Operational", "details": "Petroleum tank farm", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "MMLP Mundra", "lat": 22.83, "lng": 69.71, "sector": "Logistics", "state": "Gujarat", "year": 2015, "status": "Operational", "details": "Port-based logistics", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "MMLP Loni ICD", "lat": 28.75, "lng": 77.28, "sector": "Logistics", "state": "Uttar Pradesh", "year": 2021, "status": "Operational", "details": "CWC alliance", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "MMLP Valvada ICD", "lat": 20.15, "lng": 72.95, "sector": "Logistics", "state": "Gujarat", "year": 2022, "status": "Operational", "details": "CWC alliance", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "MMLP Virochannagar", "lat": 23.0, "lng": 69.5, "sector": "Logistics", "state": "Gujarat", "year": 2023, "status": "Operational", "details": "Kutch region", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "Warehouse Tauru", "lat": 28.15, "lng": 76.95, "sector": "Logistics", "state": "Haryana", "year": 2020, "status": "Operational", "details": "NCR region", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "Warehouse Kalyan", "lat": 19.24, "lng": 73.13, "sector": "Logistics", "state": "Maharashtra", "year": 2021, "status": "Operational", "details": "Mumbai region", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "Warehouse Indore", "lat": 22.72, "lng": 75.86, "sector": "Logistics", "state": "Madhya Pradesh", "year": 2021, "status": "Operational", "details": "Central India", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "Warehouse Patna", "lat": 25.61, "lng": 85.14, "sector": "Logistics", "state": "Bihar", "year": 2022, "status": "Operational", "details": "East India hub", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "CFS Mundra", "lat": 22.84, "lng": 69.73, "sector": "Logistics", "state": "Gujarat", "year": 2014, "status": "Operational", "details": "Container freight station", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "CFS Hazira", "lat": 21.13, "lng": 72.64, "sector": "Logistics", "state": "Gujarat", "year": 2014, "status": "Operational", "details": "Container freight station", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "FTWZ Mundra", "lat": 22.82, "lng": 69.7, "sector": "Logistics", "state": "Gujarat", "year": 2016, "status": "Operational", "details": "Free trade warehouse zone", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "Kattupalli Warehouse", "lat": 13.26, "lng": 80.34, "sector": "Logistics", "state": "Tamil Nadu", "year": 2021, "status": "Operational", "details": "Port-based", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "Moga Base Silo", "lat": 30.8166, "lng": 75.1721, "sector": "Grain Silo", "state": "Punjab", "year": 2007, "status": "Operational", "details": "First FCI silo, 0.5 lakh MT", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "Kaithal Base Silo", "lat": 29.8015, "lng": 76.4, "sector": "Grain Silo", "state": "Haryana", "year": 2008, "status": "Operational", "details": "FCI silo, 0.5 lakh MT", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "Chennai Field Silo", "lat": 13.0827, "lng": 80.2707, "sector": "Grain Silo", "state": "Tamil Nadu", "year": 2009, "status": "Operational", "details": "Receiving depot", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "Bangalore Field Silo", "lat": 12.9716, "lng": 77.5946, "sector": "Grain Silo", "state": "Karnataka", "year": 2009, "status": "Operational", "details": "Receiving depot", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "Mumbai Field Silo", "lat": 19.076, "lng": 72.8777, "sector": "Grain Silo", "state": "Maharashtra", "year": 2010, "status": "Operational", "details": "Navi Mumbai depot", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "Kolkata Field Silo", "lat": 22.5726, "lng": 88.3639, "sector": "Grain Silo", "state": "West Bengal", "year": 2010, "status": "Operational", "details": "Hooghly area", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "Coimbatore Field Silo", "lat": 11.0168, "lng": 76.9558, "sector": "Grain Silo", "state": "Tamil Nadu", "year": 2011, "status": "Operational", "details": "South India depot", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "MP Silo Complex", "lat": 23.25, "lng": 77.4, "sector": "Grain Silo", "state": "Madhya Pradesh", "year": 2015, "status": "Operational", "details": "State govt contract, 3 lakh MT", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Bihar Expansion", "lat": 25.6, "lng": 85.1, "sector": "Grain Silo", "state": "Bihar", "year": 2020, "status": "Operational", "details": "Multiple locations", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "UP Expansion", "lat": 26.85, "lng": 81.0, "sector": "Grain Silo", "state": "Uttar Pradesh", "year": 2021, "status": "Operational", "details": "Multiple locations", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Kanpur Silo Complex", "lat": 26.4499, "lng": 80.3319, "sector": "Grain Silo", "state": "Uttar Pradesh", "year": 2023, "status": "Under Construction", "details": "FCI new contract", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Gonda Silo Complex", "lat": 27.13, "lng": 81.95, "sector": "Grain Silo", "state": "Uttar Pradesh", "year": 2023, "status": "Under Construction", "details": "FCI new contract", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Sandila Silo Complex", "lat": 27.07, "lng": 80.52, "sector": "Grain Silo", "state": "Uttar Pradesh", "year": 2023, "status": "Under Construction", "details": "FCI new contract", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Katihar Silo Complex", "lat": 25.55, "lng": 87.57, "sector": "Grain Silo", "state": "Bihar", "year": 2023, "status": "Under Construction", "details": "FCI new contract", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Gujarat Expansion", "lat": 22.5, "lng": 71.0, "sector": "Grain Silo", "state": "Gujarat", "year": 2022, "status": "Operational", "details": "Multiple locations", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "AWL Mundra Refinery", "lat": 22.83, "lng": 69.7, "sector": "Food/FMCG", "state": "Gujarat", "year": 2000, "status": "Operational", "details": "India's largest port-based, 5,000 TPD", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "AWL Haldia Refinery", "lat": 22.06, "lng": 88.06, "sector": "Food/FMCG", "state": "West Bengal", "year": 2005, "status": "Operational", "details": "Major refinery", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "AWL Mantralayam", "lat": 15.99, "lng": 77.45, "sector": "Food/FMCG", "state": "Andhra Pradesh", "year": 2005, "status": "Operational", "details": "Kurnool district", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "AWL Kakinada", "lat": 16.94, "lng": 82.24, "sector": "Food/FMCG", "state": "Andhra Pradesh", "year": 2008, "status": "Operational", "details": "East Godavari", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "AWL Mangalore", "lat": 12.9141, "lng": 74.856, "sector": "Food/FMCG", "state": "Karnataka", "year": 2010, "status": "Operational", "details": "Coastal refinery", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "AWL Hazira", "lat": 21.13, "lng": 72.64, "sector": "Food/FMCG", "state": "Gujarat", "year": 2012, "status": "Operational", "details": "Surat region", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "AWL Paradip", "lat": 20.3167, "lng": 86.61, "sector": "Food/FMCG", "state": "Odisha", "year": 2015, "status": "Operational", "details": "Port-based", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "AWL Krishnapatnam", "lat": 14.2833, "lng": 80.0833, "sector": "Food/FMCG", "state": "Andhra Pradesh", "year": 2018, "status": "Operational", "details": "Coastal refinery", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "AWL Bundi Crushing", "lat": 25.44, "lng": 75.64, "sector": "Food/FMCG", "state": "Rajasthan", "year": 2006, "status": "Operational", "details": "Oilseed crushing", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "AWL Neemuch", "lat": 24.47, "lng": 74.87, "sector": "Food/FMCG", "state": "Madhya Pradesh", "year": 2008, "status": "Operational", "details": "Oilseed crushing", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "AWL Nagpur/Saoner", "lat": 21.39, "lng": 78.92, "sector": "Food/FMCG", "state": "Maharashtra", "year": 2009, "status": "Operational", "details": "Central India", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "AWL Chhindwara", "lat": 22.06, "lng": 78.94, "sector": "Food/FMCG", "state": "Madhya Pradesh", "year": 2010, "status": "Operational", "details": "Oilseed processing", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "AWL Alwar", "lat": 27.56, "lng": 76.62, "sector": "Food/FMCG", "state": "Rajasthan", "year": 2011, "status": "Operational", "details": "North India", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "AWL Kadi", "lat": 23.3, "lng": 72.33, "sector": "Food/FMCG", "state": "Gujarat", "year": 2012, "status": "Operational", "details": "Mehsana", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "No", "color": "#DC143C"}, {"name": "AWL Vidisha", "lat": 23.53, "lng": 77.81, "sector": "Food/FMCG", "state": "Madhya Pradesh", "year": 2014, "status": "Operational", "details": "Wheat flour", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "AWL Ludhiana", "lat": 30.901, "lng": 75.8573, "sector": "Food/FMCG", "state": "Punjab", "year": 2017, "status": "Operational", "details": "North India hub", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "AWL Ghaziabad", "lat": 28.6692, "lng": 77.4538, "sector": "Food/FMCG", "state": "Uttar Pradesh", "year": 2018, "status": "Operational", "details": "NCR region", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "AWL Patiala/Banur", "lat": 30.6, "lng": 76.6, "sector": "Food/FMCG", "state": "Punjab", "year": 2019, "status": "Operational", "details": "Besan processing", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "AWL Gohana", "lat": 29.12, "lng": 76.7, "sector": "Food/FMCG", "state": "Haryana", "year": 2022, "status": "Operational", "details": "India's largest integrated food complex", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "AWL Khargone", "lat": 21.82, "lng": 75.61, "sector": "Food/FMCG", "state": "Madhya Pradesh", "year": 2021, "status": "Operational", "details": "Food processing park", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "AWL Jaipur", "lat": 26.9124, "lng": 75.7873, "sector": "Food/FMCG", "state": "Rajasthan", "year": 2020, "status": "Operational", "details": "Distribution hub", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "AWL Morena", "lat": 26.5, "lng": 78.0, "sector": "Food/FMCG", "state": "Madhya Pradesh", "year": 2019, "status": "Operational", "details": "Wheat processing", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "AWL Singur", "lat": 22.81, "lng": 88.23, "sector": "Food/FMCG", "state": "West Bengal", "year": 2020, "status": "Operational", "details": "East India", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Kohinoor Rice", "lat": 30.5, "lng": 75.5, "sector": "Food/FMCG", "state": "Punjab", "year": 2022, "status": "Operational", "details": "Brand acquisition", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "AWL Pilkhuwa", "lat": 28.71, "lng": 77.66, "sector": "Food/FMCG", "state": "Uttar Pradesh", "year": 2021, "status": "Operational", "details": "UP region", "support_type": "Direct Govt Contract/PPP", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#DC143C"}, {"name": "Kutch Copper Refinery", "lat": 22.82, "lng": 69.71, "sector": "Mining/Metals", "state": "Gujarat", "year": 2024, "status": "Operational", "details": "0.5 MTPA, $1.2B, world's largest planned", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Gare Palma Coal Block", "lat": 22.3, "lng": 82.5, "sector": "Mining/Metals", "state": "Chhattisgarh", "year": 2018, "status": "Operational", "details": "Coal mining", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Godda Coal Block", "lat": 24.8, "lng": 87.2, "sector": "Mining/Metals", "state": "Jharkhand", "year": 2020, "status": "Operational", "details": "Power plant linkage", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Talabira Coal Block", "lat": 21.6, "lng": 83.8, "sector": "Mining/Metals", "state": "Odisha", "year": 2020, "status": "Operational", "details": "Mining operations", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Ballada Bauxite Mine", "lat": 18.5, "lng": 82.5, "sector": "Mining/Metals", "state": "Odisha", "year": 2025, "status": "Planned", "details": "Koraput, for aluminium", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Odisha Aluminium Refinery", "lat": 20.0, "lng": 85.0, "sector": "Mining/Metals", "state": "Odisha", "year": 2025, "status": "Planned", "details": "Part of \u20b92.3 lakh Cr MoU", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Carmichael Coal Mine", "lat": -22.0, "lng": 146.5, "sector": "Mining/Metals", "state": "Queensland, Australia", "year": 2021, "status": "Operational", "details": "10 MTPA, Galilee Basin", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "Copper Tubes Expansion", "lat": 22.81, "lng": 69.7, "sector": "Mining/Metals", "state": "Gujarat", "year": 2025, "status": "Planned", "details": "MetTube JV, downstream", "support_type": "Policy/Regulatory Benefit", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FFD700"}, {"name": "NDTV Headquarters", "lat": 28.6139, "lng": 77.209, "sector": "Media", "state": "Delhi", "year": 2022, "status": "Operational", "details": "Acquired 64.71% stake", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "NDTV Studio Mumbai", "lat": 19.076, "lng": 72.8777, "sector": "Media", "state": "Maharashtra", "year": 2022, "status": "Operational", "details": "Production facility", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "NDTV Network", "lat": 28.6139, "lng": 77.209, "sector": "Media", "state": "Pan India", "year": 2022, "status": "Operational", "details": "24x7 English, Hindi channels", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Dharavi Redevelopment", "lat": 19.043, "lng": 72.8567, "sector": "Real Estate", "state": "Maharashtra", "year": 2022, "status": "Awarded", "details": "\u20b95,069 Cr bid, Asia's largest slum rehab", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "Adani Realty Projects", "lat": 23.0225, "lng": 72.5714, "sector": "Real Estate", "state": "Gujarat", "year": 2020, "status": "Operational", "details": "Ahmedabad developments", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "Shantigram Township", "lat": 23.1, "lng": 72.6, "sector": "Real Estate", "state": "Gujarat", "year": 2015, "status": "Operational", "details": "Near Ahmedabad", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "Rajasthan 100 GW RE", "lat": 27.0, "lng": 73.0, "sector": "State MoU", "state": "Rajasthan", "year": 2024, "status": "Planned", "details": "\u20b97.5 lakh Cr, world's largest green ecosystem", "support_type": "State Government MoU", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF6347"}, {"name": "Odisha Multi-Sector", "lat": 20.5, "lng": 84.5, "sector": "State MoU", "state": "Odisha", "year": 2025, "status": "Planned", "details": "\u20b92.3 lakh Cr, power/cement/aluminium/ports", "support_type": "State Government MoU", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF6347"}, {"name": "Andhra Pradesh Investment", "lat": 15.5, "lng": 79.0, "sector": "State MoU", "state": "Andhra Pradesh", "year": 2025, "status": "Planned", "details": "\u20b91 lakh Cr additional over 10 years", "support_type": "State Government MoU", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF6347"}, {"name": "Assam Power & PSP", "lat": 26.2, "lng": 92.5, "sector": "State MoU", "state": "Assam", "year": 2025, "status": "Awarded", "details": "\u20b963,000 Cr thermal + PSP", "support_type": "State Government MoU", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF6347"}, {"name": "Tamil Nadu Investment", "lat": 13.0, "lng": 80.0, "sector": "State MoU", "state": "Tamil Nadu", "year": 2024, "status": "MoU Signed", "details": "\u20b942,700 Cr, PSP/Data Center/Cement/Gas", "support_type": "State Government MoU", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF6347"}, {"name": "Maharashtra Data Centers", "lat": 19.0, "lng": 73.0, "sector": "State MoU", "state": "Maharashtra", "year": 2024, "status": "MoU Signed", "details": "\u20b950,000 Cr, 1 GW hyperscale", "support_type": "State Government MoU", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF6347"}, {"name": "Maharashtra PSP", "lat": 17.5, "lng": 73.5, "sector": "State MoU", "state": "Maharashtra", "year": 2022, "status": "MoU Signed", "details": "\u20b960,000 Cr, 5 Western Ghats PSP", "support_type": "State Government MoU", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF6347"}, {"name": "Telangana Investment", "lat": 17.5, "lng": 78.5, "sector": "State MoU", "state": "Telangana", "year": 2024, "status": "MoU Signed", "details": "\u20b912,400 Cr, PSP/Data/Cement/Defence", "support_type": "State Government MoU", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF6347"}, {"name": "Kerala Investment", "lat": 10.0, "lng": 76.5, "sector": "State MoU", "state": "Kerala", "year": 2025, "status": "Planned", "details": "\u20b930,000 Cr over 5 years", "support_type": "State Government MoU", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF6347"}, {"name": "Chhattisgarh Expansion", "lat": 21.5, "lng": 82.0, "sector": "State MoU", "state": "Chhattisgarh", "year": 2024, "status": "Planned", "details": "Cement and power expansion", "support_type": "State Government MoU", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF6347"}, {"name": "Bihar Cement & Infra", "lat": 25.6, "lng": 85.0, "sector": "State MoU", "state": "Bihar", "year": 2025, "status": "Under Construction", "details": "\u20b91,600 Cr cement + logistics", "support_type": "State Government MoU", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF6347"}, {"name": "Madhya Pradesh Expansion", "lat": 23.25, "lng": 77.5, "sector": "State MoU", "state": "Madhya Pradesh", "year": 2024, "status": "Planned", "details": "Multi-sector investments", "support_type": "State Government MoU", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF6347"}, {"name": "Karnataka Projects", "lat": 15.0, "lng": 76.0, "sector": "State MoU", "state": "Karnataka", "year": 2024, "status": "Under Development", "details": "Cement, RE, logistics", "support_type": "State Government MoU", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF6347"}, {"name": "West Bengal Expansion", "lat": 22.5, "lng": 88.5, "sector": "State MoU", "state": "West Bengal", "year": 2024, "status": "Planned", "details": "Port, cement, logistics", "support_type": "State Government MoU", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF6347"}, {"name": "Gujarat Future Projects", "lat": 23.0, "lng": 72.0, "sector": "State MoU", "state": "Gujarat", "year": 2024, "status": "Under Development", "details": "Continued expansion across sectors", "support_type": "State Government MoU", "is_goi": true, "is_international": false, "modi_era": "Yes", "color": "#FF6347"}, {"name": "Haifa Port", "lat": 32.8191, "lng": 34.9983, "sector": "International Port", "state": "Israel", "year": 2023, "status": "Operational", "details": "70% stake with Gadot Group, $1.2B acquisition, 50% of Israel's trade, strategic Mediterranean gateway", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "Colombo West International Terminal", "lat": 6.9497, "lng": 79.8425, "sector": "International Port", "state": "Sri Lanka", "year": 2025, "status": "Operational", "details": "51% stake with John Keells & SL Ports Authority, $800M investment, 3.2M TEU capacity, 35-year BOT", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "Dar es Salaam Container Terminal", "lat": -6.8235, "lng": 39.2695, "sector": "International Port", "state": "Tanzania", "year": 2024, "status": "Operational", "details": "95% stake TICTS, 30-year concession, 1M TEU capacity, gateway to DRC/Zambia", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "Da Nang Port (Proposed)", "lat": 16.0678, "lng": 108.2208, "sector": "International Port", "state": "Vietnam", "year": 2025, "status": "Planned", "details": "In-principle govt approval, greenfield development, container terminals + multipurpose berths", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "South Africa Port Projects", "lat": -33.9249, "lng": 18.4241, "sector": "International Port", "state": "South Africa", "year": 2025, "status": "Under Evaluation", "details": "Evaluating entry into South African ports amid Transnet infrastructure gaps", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "Carmichael Coal Mine", "lat": -22.0833, "lng": 146.65, "sector": "Coal Mining - Australia", "state": "Australia", "year": 2021, "status": "Operational", "details": "Galilee Basin, 10 MTPA capacity, acquired 2010, operational 2021, Bravus Mining rebranded", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "NQXT Abbot Point Terminal", "lat": -19.8667, "lng": 148.0833, "sector": "Coal Terminal - Australia", "state": "Australia", "year": 2025, "status": "Operational", "details": "50 MTPA coal export terminal, Coral Sea access, acquired Dec 2023", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "Bravus Rail Network", "lat": -21.0, "lng": 147.5, "sector": "Rail - Australia", "state": "Australia", "year": 2022, "status": "Operational", "details": "200 km railway, connects Carmichael to Abbot Point, jointly controlled entity", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "Bunyu Coal Mine", "lat": 3.45, "lng": 117.8667, "sector": "Coal Mining - Indonesia", "state": "Indonesia", "year": 2008, "status": "Operational", "details": "First overseas acquisition, 180 MT reserves, PT Lamindo Inter Multikon operator", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "No", "color": "#9932CC"}, {"name": "PT Adani Global Coal Terminal", "lat": 3.4, "lng": 117.8, "sector": "Coal Terminal - Indonesia", "state": "Indonesia", "year": 2007, "status": "Operational", "details": "Coal terminal 2500 TPH (upgrading to 5000 TPH), transshipment via Surya Pratama Karya", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "No", "color": "#9932CC"}, {"name": "Astro Offshore Fleet - Middle East", "lat": 25.2048, "lng": 55.2708, "sector": "Maritime Fleet", "state": "UAE", "year": 2024, "status": "Operational", "details": "80% stake $185M, 49 OSVs including AHTs, MPSVs, PSVs, barges, workboats", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Astro Offshore Fleet - West Africa", "lat": 6.4541, "lng": 3.3947, "sector": "Maritime Fleet", "state": "Nigeria", "year": 2025, "status": "Operational", "details": "5 vessels acquired Sep 2025 including 4 PSVs and 1 MPSV for West Africa operations", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#4169E1"}, {"name": "APSEZ Tugs & Dredgers Fleet", "lat": 22.8361, "lng": 69.7111, "sector": "Maritime Fleet", "state": "Gujarat", "year": 2024, "status": "Operational", "details": "142 tugs and dredgers, pan-India port operations support", "support_type": "Private Acquisition (No GOI)", "is_goi": false, "is_international": false, "modi_era": "Yes", "color": "#4169E1"}, {"name": "Chhukha Hydropower Project", "lat": 27.0, "lng": 89.55, "sector": "Overseas Hydro", "state": "Bhutan", "year": 2024, "status": "MoU Signed", "details": "570 MW hydropower plant, MoU signed June 2024, electricity export to India", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "Chamkarchu Hydropower Project", "lat": 27.2, "lng": 90.8, "sector": "Overseas Hydro", "state": "Bhutan", "year": 2025, "status": "Under Evaluation", "details": "700 MW project, approvals in place, immediate commencement possible", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "Nepal Hydropower Projects", "lat": 28.3949, "lng": 84.124, "sector": "Overseas Hydro", "state": "Nepal", "year": 2025, "status": "In Talks", "details": "Multiple sites, in talks with developers, electricity export to India via grid", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "Kenya Hydropower Projects", "lat": -1.2921, "lng": 36.8219, "sector": "Overseas Hydro", "state": "Kenya", "year": 2025, "status": "Feasibility Study", "details": "Part of 10 GW overseas hydro target, feasibility studies ongoing", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "Tanzania Hydropower Projects", "lat": -6.163, "lng": 35.7516, "sector": "Overseas Hydro", "state": "Tanzania", "year": 2025, "status": "Feasibility Study", "details": "Part of 10 GW overseas hydro target, feasibility studies ongoing", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "Philippines Hydropower Projects", "lat": 14.5995, "lng": 120.9842, "sector": "Overseas Hydro", "state": "Philippines", "year": 2025, "status": "Under Evaluation", "details": "Part of 10 GW overseas hydro target, favorable topography identified", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "Vietnam Hydropower Projects", "lat": 21.0285, "lng": 105.8542, "sector": "Overseas Hydro", "state": "Vietnam", "year": 2025, "status": "Feasibility Study", "details": "Part of 10 GW overseas hydro target, part of $3B Vietnam investment plan", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "Adani Global Pte Ltd", "lat": 1.3521, "lng": 103.8198, "sector": "Offshore Entity", "state": "Singapore", "year": 2007, "status": "Operational", "details": "Coal trading, investments, holds Australian rail assets, key trading hub", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": true, "modi_era": "No", "color": "#1E90FF"}, {"name": "Adani Global Resources Pte", "lat": 1.3521, "lng": 103.8198, "sector": "Offshore Entity", "state": "Singapore", "year": 2017, "status": "Operational", "details": "Holds Carmichael Rail Network Trust, Australian assets holding", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "Taurus Commodities General Trading", "lat": 25.2048, "lng": 55.2708, "sector": "Trading Entity", "state": "UAE", "year": 2021, "status": "Operational", "details": "Coal trading intermediary, $1.8B coal supplied 2021-2023", "support_type": "Organic Growth (No GOI)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#1E90FF"}, {"name": "Adani-EDGE Group JV", "lat": 24.4539, "lng": 54.3773, "sector": "International Defence JV", "state": "UAE", "year": 2024, "status": "MoU Signed", "details": "Missiles, weapons, UAVs, counter-drone, EW systems, R&D facilities in India & UAE", "support_type": "Defence Production License", "is_goi": true, "is_international": true, "modi_era": "Yes", "color": "#006400"}, {"name": "Adani-Elbit UAV Manufacturing", "lat": 17.385, "lng": 78.4867, "sector": "International Defence JV", "state": "Israel", "year": 2018, "status": "Operational", "details": "Hermes 900 UAV manufacturing facility, Adani-Elbit JV in Hyderabad", "support_type": "Defence Production License", "is_goi": true, "is_international": true, "modi_era": "Yes", "color": "#006400"}, {"name": "Godda Power Export to Bangladesh", "lat": 23.8103, "lng": 90.4125, "sector": "Power Export", "state": "Bangladesh", "year": 2023, "status": "Disputed", "details": "1,600 MW Godda plant exports to Dhaka, $800M+ dues pending, supply disrupted", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "JKIA Airport Operation (Cancelled)", "lat": -1.3192, "lng": 36.9278, "sector": "Cancelled International", "state": "Kenya", "year": 2024, "status": "Cancelled", "details": "$1.85B 30-year BOT cancelled Nov 2024 post US indictment, whistleblower allegations", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}, {"name": "Kenya Power Transmission (Suspended)", "lat": -1.2921, "lng": 36.8219, "sector": "Cancelled International", "state": "Kenya", "year": 2024, "status": "Suspended", "details": "$1.3B power transmission with Africa50, court suspended Oct 2024", "support_type": "International (Foreign Govt)", "is_goi": false, "is_international": true, "modi_era": "Yes", "color": "#9932CC"}];
+        
+        const isMobile = window.innerWidth < 768;
+        const initialCenter = isMobile ? [22, 78] : [20, 50];
+        const initialZoom = isMobile ? 4 : 3;
+        
+        const map = L.map('map', {
+            zoomControl: false,
+            attributionControl: false,
+            tap: true,
+            dragging: true,
+            touchZoom: true,
+            scrollWheelZoom: !isMobile,
+            doubleClickZoom: true
+        }).setView(initialCenter, initialZoom);
+        
+        L.control.zoom({ position: 'topright' }).addTo(map);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+        L.control.attribution({position: 'bottomleft'}).addAttribution('© OSM © CARTO').addTo(map);
+        
+        let markers = [];
+        let currentYear = 2025;
+        let showIndia = true, showIntl = true, showGOI = true, showPrivate = true;
+        let playing = false, playInterval;
+        let panelExpanded = false;
+        
+        function togglePanel() {
+            panelExpanded = !panelExpanded;
+            document.getElementById('bottomPanel').classList.toggle('expanded', panelExpanded);
+            setTimeout(() => map.invalidateSize(), 350);
+        }
+        
+        function toggleLegend() {
+            const grid = document.getElementById('legendGrid');
+            const arrow = document.getElementById('legendArrow');
+            grid.classList.toggle('collapsed');
+            arrow.textContent = grid.classList.contains('collapsed') ? '▶' : '▼';
+        }
+        
+        function showDisclaimer() {
+            document.getElementById('disclaimerModal').classList.remove('hidden');
+        }
+        
+        function closeDisclaimer() {
+            document.getElementById('disclaimerModal').classList.add('hidden');
+        }
+        
+        function setView(view) {
+            document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            if (view === 'india') {
+                map.setView([22, 82], isMobile ? 4 : 5);
+                showIndia = true; showIntl = false;
+            } else if (view === 'global') {
+                map.setView(isMobile ? [22, 78] : [20, 50], isMobile ? 3 : 3);
+                showIndia = true; showIntl = true;
+            } else {
+                map.setView([10, 60], 3);
+                showIndia = false; showIntl = true;
+            }
+            
+            document.getElementById('toggleIndia').classList.toggle('active', showIndia);
+            document.getElementById('toggleIntl').classList.toggle('active', showIntl);
+            createMarkers();
+        }
+        
+        function createMarkers() {
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+            
+            let stats = { total: 0, india: 0, intl: 0, goi: 0, private: 0, modiGoi: 0, modiTotal: 0 };
+            
+            markersData.forEach(d => {
+                const geoFilter = (d.is_international && showIntl) || (!d.is_international && showIndia);
+                const supportFilter = (d.is_goi && showGOI) || (!d.is_goi && showPrivate);
+                const yearFilter = d.year <= currentYear;
+                
+                if (geoFilter && supportFilter && yearFilter) {
+                    const radius = d.is_international ? 8 : (d.is_goi ? 6 : 5);
+                    
+                    const marker = L.circleMarker([d.lat, d.lng], {
+                        radius: radius,
+                        fillColor: d.color,
+                        color: d.is_international ? '#9932CC' : '#666',
+                        weight: d.is_international ? 2 : 1,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    }).addTo(map);
+                    
+                    let badge = d.is_international ? '<span class="popup-badge badge-intl">INT\'L</span>' :
+                               (d.is_goi ? '<span class="popup-badge badge-goi">GOI</span>' : 
+                               '<span class="popup-badge badge-private">PRIVATE</span>');
+                    
+                    marker.bindPopup(`
+                        <div>
+                            <div class="popup-title">${d.name}${badge}</div>
+                            <div class="popup-row"><span class="popup-label">Sector:</span> ${d.sector}</div>
+                            <div class="popup-row"><span class="popup-label">Location:</span> ${d.state}</div>
+                            <div class="popup-row"><span class="popup-label">Year:</span> ${d.year}</div>
+                            <div class="popup-row"><span class="popup-label">Status:</span> ${d.status}</div>
+                            <div class="popup-row"><span class="popup-label">Type:</span> ${d.support_type}</div>
+                            ${d.details ? '<div class="popup-details">' + d.details.substring(0,150) + '</div>' : ''}
+                        </div>
+                    `, { maxWidth: 280 });
+                    
+                    markers.push(marker);
+                    
+                    stats.total++;
+                    if (d.is_international) stats.intl++; else stats.india++;
+                    if (d.is_goi) stats.goi++; else stats.private++;
+                    if (d.modi_era === 'Yes') {
+                        stats.modiTotal++;
+                        if (d.is_goi) stats.modiGoi++;
+                    }
+                }
+            });
+            
+            updateStats(stats);
+        }
+        
+        function updateStats(s) {
+            const pct = s.modiTotal > 0 ? Math.round(s.modiGoi / s.modiTotal * 100) : 0;
+            document.getElementById('liveStats').innerHTML = 
+                '<strong>Visible:</strong> ' + s.total + ' | <strong>GOI:</strong> ' + s.goi + 
+                ' | <strong>Private:</strong> ' + s.private + '<br><strong>Modi-era GOI rate:</strong> ' + pct + '%';
+        }
+        
+        document.getElementById('toggleIndia').onclick = function() {
+            showIndia = !showIndia;
+            this.classList.toggle('active');
+            createMarkers();
+        };
+        
+        document.getElementById('toggleIntl').onclick = function() {
+            showIntl = !showIntl;
+            this.classList.toggle('active');
+            createMarkers();
+        };
+        
+        document.getElementById('toggleGOI').onclick = function() {
+            showGOI = !showGOI;
+            this.classList.toggle('active');
+            createMarkers();
+        };
+        
+        document.getElementById('togglePrivate').onclick = function() {
+            showPrivate = !showPrivate;
+            this.classList.toggle('active');
+            createMarkers();
+        };
+        
+        document.getElementById('yearSlider').oninput = function() {
+            currentYear = parseInt(this.value);
+            document.getElementById('yearDisplay').textContent = currentYear;
+            createMarkers();
+        };
+        
+        document.getElementById('playBtn').onclick = function() {
+            if (playing) {
+                clearInterval(playInterval);
+                this.textContent = '▶ Play';
+                playing = false;
+            } else {
+                currentYear = 2000;
+                document.getElementById('yearSlider').value = currentYear;
+                this.textContent = '⏸ Pause';
+                playing = true;
+                playInterval = setInterval(() => {
+                    if (currentYear >= 2025) {
+                        clearInterval(playInterval);
+                        document.getElementById('playBtn').textContent = '▶ Play';
+                        playing = false;
+                    } else {
+                        currentYear++;
+                        document.getElementById('yearSlider').value = currentYear;
+                        document.getElementById('yearDisplay').textContent = currentYear;
+                        createMarkers();
+                    }
+                }, 350);
+            }
+        };
+        
+        document.getElementById('resetBtn').onclick = function() {
+            clearInterval(playInterval);
+            playing = false;
+            currentYear = 2025;
+            showIndia = showIntl = showGOI = showPrivate = true;
+            document.getElementById('yearSlider').value = 2025;
+            document.getElementById('yearDisplay').textContent = '2025';
+            document.getElementById('playBtn').textContent = '▶ Play';
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.add('active'));
+            map.setView([20, 50], 3);
+            createMarkers();
+        };
+        
+        createMarkers();
+        window.addEventListener('resize', () => map.invalidateSize());
+    </script>
+</body>
+</html>
