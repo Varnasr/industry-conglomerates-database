@@ -390,13 +390,13 @@
             <div class="logo-icon">A</div>
             <div class="logo-text">Adani <span>Infra DB</span></div>
         </a>
-        <button class="info-btn" onclick="showDisclaimer()">ℹ️</button>
+        <button class="info-btn" onclick="showDisclaimer()" aria-label="About this database"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></button>
     </div>
     
     <div class="filter-pills">
-        <button class="pill active" onclick="setView('global')">🌐 Global</button>
-        <button class="pill" onclick="setView('india')">🇮🇳 India</button>
-        <button class="pill" onclick="setView('intl')">✈️ Int'l</button>
+        <button class="pill active" onclick="setView('global')">Global</button>
+        <button class="pill" onclick="setView('india')">India</button>
+        <button class="pill" onclick="setView('intl')">Int'l</button>
     </div>
     
     <div id="map"></div>
@@ -417,10 +417,10 @@
             <div class="section">
                 <div class="section-title">Filter Data</div>
                 <div class="filter-grid">
-                    <button class="filter-btn active" id="toggleIndia">🇮🇳 India</button>
-                    <button class="filter-btn active" id="toggleIntl">✈️ Int'l</button>
-                    <button class="filter-btn active" id="toggleGOI">🏛️ GOI</button>
-                    <button class="filter-btn active" id="togglePrivate">🏢 Private</button>
+                    <button class="filter-btn active" id="toggleIndia">India</button>
+                    <button class="filter-btn active" id="toggleIntl">Int'l</button>
+                    <button class="filter-btn active" id="toggleGOI">GOI</button>
+                    <button class="filter-btn active" id="togglePrivate">Private</button>
                 </div>
             </div>
             
@@ -474,8 +474,8 @@
                     <div class="desc">of Modi-era projects (2014+) received GOI support</div>
                 </div>
                 <div class="legal-notice">
-                    <strong>⚖️ Disclaimer:</strong> Independent research database from public sources. NOT affiliated with Adani Group or GOI. "GOI support" does NOT imply wrongdoing.<br><br>
-                    <strong>🇮🇳 Compliance:</strong> IT Act 2000 §79, RTI Act 2005, Copyright Act §52.
+                    <strong>Disclaimer:</strong> Independent research database from public sources. NOT affiliated with Adani Group or GOI. "GOI support" does NOT imply wrongdoing.<br><br>
+                    <strong>Compliance:</strong> IT Act 2000 §79, RTI Act 2005, Copyright Act §52.
                 </div>
                 <div class="license-badge">
                     <img src="https://licensebuttons.net/l/by/4.0/88x31.png" alt="CC BY 4.0">
