@@ -312,7 +312,7 @@ input[type=range]::-webkit-slider-thumb{
         <span class="timeline-year" id="yearDisplay">2025</span>
       </div>
     </div>
-    <input type="range" id="yearSlider" min="1999" max="2025" value="2025" oninput="setYear(this.value)">
+    <input type="range" id="yearSlider" min="1999" max="2025" value="2025" aria-label="Year" oninput="setYear(this.value)">
   </div>
 
   <div class="stats-grid">
@@ -330,7 +330,7 @@ input[type=range]::-webkit-slider-thumb{
     </div>
   </div>
 
-  <div class="charts-section">
+  <div class="charts-section" tabindex="0" role="region" aria-label="Charts, scrolls vertically">
     <div class="chart-card">
       <div class="chart-title"><iconify-icon icon="si:bar-chart-line"></iconify-icon> Projects by Sector</div>
       <div class="chart-container"><canvas id="sectorChart"></canvas></div>
@@ -347,7 +347,7 @@ input[type=range]::-webkit-slider-thumb{
 </div>
 
 <!-- Sidebar toggle (desktop) -->
-<button class="sidebar-toggle open" id="sidebarToggle" onclick="toggleSidebar()"><iconify-icon icon="si:chevron-left-line" id="toggleIcon"></iconify-icon></button>
+<button class="sidebar-toggle open" id="sidebarToggle" aria-label="Hide the sidebar" aria-expanded="true" onclick="toggleSidebar()"><iconify-icon icon="si:chevron-left-line" id="toggleIcon"></iconify-icon></button>
 
 <!-- View toggle -->
 <div class="view-toggle">
@@ -576,6 +576,10 @@ function toggleSidebar() {
   icon.setAttribute('icon', collapsed ? 'si:chevron-right-line' : 'si:chevron-left-line');
   btn.classList.toggle('open', !collapsed);
   btn.classList.toggle('closed', collapsed);
+  // The chevron is the only visible cue, so the name and the state have to be
+  // kept in step for anyone who cannot see it.
+  btn.setAttribute('aria-expanded', String(!collapsed));
+  btn.setAttribute('aria-label', collapsed ? 'Show the sidebar' : 'Hide the sidebar');
   setTimeout(() => map.invalidateSize(), 350);
 }
 
