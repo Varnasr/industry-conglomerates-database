@@ -38,8 +38,8 @@
     --border: rgba(255,255,255,.08);
     --text: #e4e4ec;
     --text-dim: #9898a8;
-    --text-muted: #5c5c6e;
-    --accent: #DC2626;
+    --text-muted: #9296a8;   /* was #5c5c6e, 2.32:1 on the dark surfaces */
+    --accent: #F87171;   /* was #DC2626, 4.04:1 on the dark background */
     --accent-2: #0EA5E9;
     --accent-amber: #F59E0B;
     --accent-green: #10B981;
@@ -58,8 +58,13 @@
     --bg: #f8fafc; --surface: #ffffff; --surface-2: #f1f5f9;
     --border: rgba(15,23,42,.10);
     --text: #0f172a; --text-dim: #475569; --text-muted: #64748b;
-    --accent: #b91c1c; --accent-2: #0284c7;
-    --accent-amber: #d97706; --accent-green: #059669; --accent-purple: #7c3aed;
+    /* Second token block, declared after the first and therefore the one that
+       wins. These are the status inks used on a tint of themselves -- the ink
+       of every status pill and delta figure -- and measured on those tints
+       they ran 2.63 to 3.91:1. Darkened to clear AA; the first block above is
+       dead weight either way. */
+    --accent: #9A1818; --accent-2: #075985;
+    --accent-amber: #8F4A06; --accent-green: #036B4E; --accent-purple: #6D28D9;
     --header-bg: rgba(255, 255, 255, 0.92);
     --hero-grad: linear-gradient(135deg, #fee2e2 0%, #f8fafc 100%);
     --shadow: 0 4px 12px rgba(15,23,42,.08);
@@ -152,6 +157,13 @@ main { max-width: 1280px; margin: 0 auto; padding: 1.75rem 1.5rem; }
     .kpi-grid { grid-template-columns: repeat(2, 1fr); }
     .tools-grid { grid-template-columns: 1fr; }
     .nav-actions .btn-ghost span { display: none; }
+}
+
+/* A link inside a source line, distinguished from the sentence around it by
+   colour alone: 1.1:1 against its own text. */
+.source a, .src a, footer a, .footnote a, .meta a {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
 }
 </style>
 </head>
