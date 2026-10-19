@@ -1,5 +1,7 @@
 # Industry Conglomerates Tracker
 
+Shared engineering standard: @.claude/engineering-standards.md. It applies to all work in this repository. This file adds what is specific to the project, and wins where the two disagree.
+
 Conglomerate project tracking, with the underlying data alongside the page. Single page, no build step, deployed on Netlify.
 
 ## Commands
