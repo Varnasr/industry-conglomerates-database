@@ -1,14 +1,16 @@
-# Industry Conglomerates Tracker
+# India's largest business houses: Adani and Ambani
 
 Shared engineering standard: @.claude/engineering-standards.md. It applies to all work in this repository. This file adds what is specific to the project, and wins where the two disagree.
 
-Conglomerate project tracking: a landing page, two map pages and the dataset behind them. Static, deployed on Netlify; the map data is written into the pages by `scripts/build_pages.py`.
+Project tracking for the Adani and Reliance groups: a landing page, two map pages, a projects-and-sources table (`projects.html`) and the dataset behind them. Static, deployed on Netlify. Every figure the pages show is written from the CSV by `scripts/build_pages.py`: the map data, the table data, and the counts on `index.html` between `<!--stats:start-->` and `<!--stats:end-->`. Do not type a count into a page; `--check` fails if one drifts.
+
+`index.html` and `projects.html` share `assets/site.css`, with light and dark tokens. The map pages keep their own styles.
 
 ## Commands
 
 ```bash
 python3 scripts/check.py        # static checks, run by CI
-python3 scripts/build_pages.py  # write the CSV into both map pages
+python3 scripts/build_pages.py  # write the CSV into every page
 python3 -m http.server 8000     # then open http://localhost:8000
 ```
 
@@ -54,7 +56,7 @@ if the two drift apart again.
 
 ## Data
 
-`adani_database.csv` is the record. `crony_tracker.html` (all rows) and
+`adani_database.csv` is the record. `tracker.html` (all rows) and
 `adani_research_map.html` (Adani rows) each carry it inline as
 `const markersData = [...]` on one line, written by `scripts/build_pages.py`.
 Edit the CSV, then run the script; `scripts/check.py` fails if either page is

@@ -208,7 +208,7 @@ def _map_pages_match_csv():
                          capture_output=True, text=True)
     assert out.returncode == 0, out.stdout.strip() or out.stderr.strip()
     return out.stdout.strip().removeprefix("PASS - ")
-check("map pages match adani_database.csv", _map_pages_match_csv)
+check("every page matches adani_database.csv", _map_pages_match_csv)
 
 
 def _rows_carry_their_check():
@@ -235,19 +235,17 @@ def _stated_counts_match():
         rows = list(csv.DictReader(fh))
     total = len(rows)
     adani = [r for r in rows if r["Group"] == "Adani"]
-    tracker = (ROOT / "crony_tracker.html").read_text(encoding="utf-8")
+    tracker = (ROOT / "tracker.html").read_text(encoding="utf-8")
     research = (ROOT / "adani_research_map.html").read_text(encoding="utf-8")
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    # index.html's counts are written by build_pages.py and held by its --check.
     want = {
-        "index.html badge": (re.search(r"(\d+) projects · ", HTML), total),
-        "index.html KPI": (re.search(r'kpi-value">(\d+)</div>\s*<div class="kpi-label">Projects', HTML)
-                           or re.search(r'Projects tracked</div>\s*<div class="kpi-value">(\d+)', HTML), total),
-        "index.html download tag": (re.search(r"· (\d+) rows", HTML), total),
-        "crony_tracker.html": (re.search(r"(\d+) Projects Tracked", tracker), total),
+        "tracker.html": (re.search(r"(\d+) Projects Tracked", tracker), total),
         "adani_research_map.html": (re.search(r'stat-num">(\d+)</div><div class="stat-label">Projects', research), len(adani)),
         "README.md": (re.search(r"database of (\d+) major", readme), total),
     }
-    wrong = [f"{k} says {m.group(1)}, CSV has {n}" for k, (m, n) in want.items() if not m or int(m.group(1)) != n]
+    wrong = [f"{k} states no count" if not m else f"{k} says {m.group(1)}, CSV has {n}"
+             for k, (m, n) in want.items() if not m or int(m.group(1)) != n]
     assert not wrong, "; ".join(wrong)
     return f"{total} projects, {len(adani)} Adani"
 check("stated project counts match the CSV", _stated_counts_match)

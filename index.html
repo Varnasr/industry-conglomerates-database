@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.iconify.design https://api.iconify.design https://api.simplesvg.com https://api.unisvg.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com https://server.arcgisonline.com; connect-src 'self' https://api.iconify.design https://api.simplesvg.com https://api.unisvg.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-ancestors 'none'; base-uri 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.iconify.design https://api.iconify.design https://api.simplesvg.com https://api.unisvg.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com https://server.arcgisonline.com; connect-src 'self' https://api.iconify.design https://api.simplesvg.com https://api.unisvg.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-ancestors 'none'; base-uri 'self'">
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRCMEB9TBW"></script>
 <script>
@@ -13,353 +13,168 @@
   gtag('config', 'G-JRCMEB9TBW', { anonymize_ip: true });
 </script>
 
-<meta name="description" content="India Industry Conglomerates Tracker, open-source geographic database of major Adani and Ambani infrastructure projects (1998–2026). An ImpactMojo project.">
-<meta property="og:title" content="Industry Conglomerates Tracker | ImpactMojo">
-<meta property="og:description" content="Open-source database of major Adani and Ambani infrastructure projects across India and globally, searchable, filterable, with government-support classification.">
+<title>India's Largest Business Houses | ImpactMojo</title>
+<meta name="description" content="India's largest business houses, Adani and Ambani: an open database of their infrastructure projects, each with its sources and how far it was checked. An ImpactMojo project.">
+<meta property="og:title" content="India's largest business houses: Adani and Ambani">
+<meta property="og:description" content="An open database of Adani and Reliance infrastructure projects in India and abroad, with a map, a searchable table and the sources behind every row.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://industrygroups.impactmojo.in/">
-
-<title>Industry Conglomerates Tracker | ImpactMojo</title>
-
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23DC2626'/><text x='16' y='22' text-anchor='middle' font-family='Inter,sans-serif' font-size='18' font-weight='700' fill='%23ffffff'>I</text></svg>">
-<meta name="theme-color" content="#DC2626">
-
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='2' y='2' width='13' height='13' rx='2' fill='%23b42318'/%3E%3Crect x='17' y='2' width='13' height='13' rx='2' fill='%231d4ed8'/%3E%3Crect x='2' y='17' width='13' height='13' rx='2' fill='%231d4ed8'/%3E%3Crect x='17' y='17' width='13' height='13' rx='2' fill='%23b42318'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amaranth:wght@400;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
-<script src="https://code.iconify.design/iconify-icon/2.3.0/iconify-icon.min.js"></script>
-
-<style>
-:root, [data-theme="dark"] {
-    --bg: #0c0c0f;
-    --surface: #141418;
-    --surface-2: #1c1c22;
-    --border: rgba(255,255,255,.08);
-    --text: #e4e4ec;
-    --text-dim: #9898a8;
-    --text-muted: #9296a8;   /* was #5c5c6e, 2.32:1 on the dark surfaces */
-    --accent: #F87171;   /* was #DC2626, 4.04:1 on the dark background */
-    --accent-2: #0EA5E9;
-    --accent-amber: #F59E0B;
-    --accent-green: #10B981;
-    --accent-purple: #A78BFA;
-    --header-bg: rgba(15, 23, 42, 0.95);
-    --hero-grad: linear-gradient(135deg, #7f1d1d 0%, #0c0c0f 100%);
-    --shadow: 0 8px 24px rgba(0,0,0,.35);
-    --radius: 12px;
-    --radius-sm: 8px;
-    --font-body: 'Amaranth', 'Inter', system-ui, sans-serif;
-    --font-heading: 'Inter', system-ui, sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
-}
-
-[data-theme="light"] {
-    --bg: #f8fafc; --surface: #ffffff; --surface-2: #f1f5f9;
-    --border: rgba(15,23,42,.10);
-    --text: #0f172a; --text-dim: #475569; --text-muted: #64748b;
-    /* Second token block, declared after the first and therefore the one that
-       wins. These are the status inks used on a tint of themselves -- the ink
-       of every status pill and delta figure -- and measured on those tints
-       they ran 2.63 to 3.91:1. Darkened to clear AA; the first block above is
-       dead weight either way. */
-    --accent: #9A1818; --accent-2: #075985;
-    --accent-amber: #8F4A06; --accent-green: #036B4E; --accent-purple: #6D28D9;
-    --header-bg: rgba(255, 255, 255, 0.92);
-    --hero-grad: linear-gradient(135deg, #fee2e2 0%, #f8fafc 100%);
-    --shadow: 0 4px 12px rgba(15,23,42,.08);
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body { font-family: var(--font-body); background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; transition: background 0.2s, color 0.2s; }
-h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; }
-code, pre, .mono { font-family: var(--font-mono); }
-a { color: var(--accent); text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-.im-header { background: var(--header-bg); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-.nav-container { max-width: 1280px; margin: 0 auto; padding: 0 1.25rem; display: flex; align-items: center; justify-content: space-between; height: 64px; gap: 1rem; }
-.logo-link { display: flex; align-items: center; gap: 0.65rem; text-decoration: none; color: var(--text); }
-.logo-mark { width: 38px; height: 38px; border-radius: 9px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); display: grid; place-items: center; font-weight: 800; color: white; font-size: 0.9rem; font-family: var(--font-heading); }
-.logo-text { font-family: var(--font-heading); font-weight: 700; font-size: 0.95rem; line-height: 1.2; }
-.logo-text small { color: var(--text-dim); font-weight: 500; font-size: 0.72rem; display: block; margin-top: 1px; }
-.nav-links { display: flex; gap: 0.25rem; align-items: center; list-style: none; }
-.nav-links > li > a, .nav-links > li > .nav-trigger { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.45rem 0.75rem; font-size: 0.85rem; font-weight: 500; color: var(--text-dim); border-radius: 8px; font-family: var(--font-heading); cursor: pointer; background: none; border: none; transition: color 0.15s, background 0.15s; }
-.nav-links > li > a:hover, .nav-links > li > .nav-trigger:hover { color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); text-decoration: none; }
-.has-dropdown { position: relative; }
-.dropdown-menu { position: absolute; top: 100%; left: 0; min-width: 200px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.4rem; list-style: none; box-shadow: var(--shadow); opacity: 0; visibility: hidden; transform: translateY(8px); transition: opacity 0.15s, transform 0.15s, visibility 0s 0.15s; }
-.has-dropdown:hover .dropdown-menu, .has-dropdown:focus-within .dropdown-menu { opacity: 1; visibility: visible; transform: translateY(0); transition: opacity 0.15s, transform 0.15s; }
-.dropdown-menu li a { display: block; padding: 0.55rem 0.75rem; color: var(--text-dim); font-size: 0.85rem; border-radius: 6px; }
-.dropdown-menu li a:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); text-decoration: none; }
-.nav-actions { display: flex; gap: 0.4rem; align-items: center; }
-.btn-icon, .btn-ghost { background: transparent; color: var(--text-dim); border: 1px solid var(--border); border-radius: 8px; padding: 0.45rem 0.75rem; font-size: 0.8rem; font-weight: 500; font-family: var(--font-heading); cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem; transition: all 0.15s; }
-.btn-icon { padding: 0.45rem 0.55rem; }
-.btn-ghost:hover, .btn-icon:hover { color: var(--accent); border-color: var(--accent); }
-.btn-icon iconify-icon, .btn-ghost iconify-icon { font-size: 1rem; }
-.theme-toggle .icon-light, .theme-toggle .icon-dark { display: none; }
-[data-theme="dark"] .theme-toggle .icon-light { display: inline; }
-[data-theme="light"] .theme-toggle .icon-dark { display: inline; }
-.mobile-menu-toggle { display: none; background: none; border: 1px solid var(--border); border-radius: 8px; width: 38px; height: 38px; cursor: pointer; color: var(--text-dim); }
-.mobile-menu-toggle iconify-icon { font-size: 1.25rem; vertical-align: middle; }
-
-.hero { background: var(--hero-grad); border-bottom: 1px solid var(--border); padding: 3rem 1.5rem 2.5rem; text-align: center; }
-.hero h1 { font-size: 2.4rem; line-height: 1.15; margin-bottom: 0.4rem; }
-.hero h1 span { color: var(--accent); }
-.hero p { color: var(--text-dim); font-size: 1rem; max-width: 720px; margin: 0 auto; }
-.badge { display: inline-flex; align-items: center; gap: 0.35rem; background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--accent); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); padding: 0.25rem 0.85rem; border-radius: 999px; font-size: 0.78rem; margin-top: 0.85rem; font-family: var(--font-heading); }
-
-main { max-width: 1280px; margin: 0 auto; padding: 1.75rem 1.5rem; }
-
-.section-title { display: flex; align-items: center; gap: 0.55rem; font-family: var(--font-heading); font-size: 1.1rem; font-weight: 700; color: var(--text); margin: 1.75rem 0 1rem; padding-bottom: 0.55rem; border-bottom: 1px solid var(--border); }
-.section-title iconify-icon { color: var(--accent); font-size: 1.3rem; }
-
-.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.85rem; margin-bottom: 0.5rem; }
-.kpi-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.15rem 1.2rem; display: flex; flex-direction: column; gap: 0.5rem; position: relative; overflow: hidden; }
-.kpi-card::before { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--kpi-color, var(--accent)); opacity: 0.7; }
-.kpi-icon { width: 38px; height: 38px; border-radius: 9px; display: grid; place-items: center; background: var(--kpi-bg, color-mix(in srgb, var(--accent) 14%, transparent)); color: var(--kpi-color, var(--accent)); font-size: 1.2rem; }
-.kpi-label { font-size: 0.78rem; color: var(--text-dim); font-family: var(--font-heading); font-weight: 500; }
-.kpi-value { font-size: 1.85rem; font-weight: 700; color: var(--text); font-family: var(--font-heading); line-height: 1.05; }
-.kpi-trend { font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-heading); }
-
-.tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
-.tool-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem 1.5rem 1.4rem; display: flex; flex-direction: column; gap: 0.7rem; text-decoration: none; color: inherit; position: relative; transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s; }
-.tool-card:hover { transform: translateY(-3px); border-color: var(--accent); box-shadow: 0 12px 32px color-mix(in srgb, var(--accent) 18%, transparent); text-decoration: none; }
-.tool-card-icon { width: 48px; height: 48px; border-radius: 10px; background: color-mix(in srgb, var(--card-color, var(--accent)) 14%, transparent); color: var(--card-color, var(--accent)); display: grid; place-items: center; font-size: 1.5rem; }
-.tool-card h3 { font-size: 1.05rem; color: var(--text); margin: 0; }
-.tool-card p { font-size: 0.88rem; color: var(--text-dim); line-height: 1.55; }
-.tool-card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem; font-size: 0.78rem; color: var(--text-muted); font-family: var(--font-heading); }
-.tool-card-arrow { color: var(--text-muted); transition: color 0.15s, transform 0.15s; font-size: 1.1rem; }
-.tool-card:hover .tool-card-arrow { color: var(--accent); transform: translateX(3px); }
-.tag { padding: 0.18rem 0.55rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; background: var(--surface-2); color: var(--text-dim); border: 1px solid var(--border); }
-
-.about { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-top: 2rem; }
-.about h3 { font-size: 1rem; margin-bottom: 0.5rem; }
-.about p { font-size: 0.92rem; color: var(--text-dim); }
-.about ul { margin-top: 0.75rem; padding-left: 1.2rem; }
-.about li { font-size: 0.88rem; color: var(--text-dim); margin-bottom: 0.3rem; }
-
-.im-footer { margin-top: 3rem; padding: 2rem 1.5rem; border-top: 1px solid var(--border); text-align: center; color: var(--text-dim); font-size: 0.85rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.6rem; }
-.im-footer iconify-icon { color: var(--accent); font-size: 1.1rem; }
-.im-footer .sep { color: var(--text-muted); }
-
-@media (max-width: 880px) {
-    .nav-links { display: none; position: fixed; top: 64px; left: 0; right: 0; background: var(--surface); border-bottom: 1px solid var(--border); flex-direction: column; padding: 0.75rem; gap: 0.25rem; }
-    .nav-links.open { display: flex; }
-    .nav-links > li { width: 100%; }
-    .nav-links > li > a, .nav-links > li > .nav-trigger { width: 100%; justify-content: space-between; }
-    .has-dropdown .dropdown-menu { position: static; opacity: 1; visibility: visible; transform: none; box-shadow: none; padding: 0 0 0 1rem; max-height: 0; overflow: hidden; transition: max-height 0.2s; border: none; }
-    .has-dropdown.open .dropdown-menu { max-height: 400px; }
-    .mobile-menu-toggle { display: inline-grid; place-items: center; }
-}
-@media (max-width: 600px) {
-    .hero h1 { font-size: 1.5rem; }
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .tools-grid { grid-template-columns: 1fr; }
-    /* `display: none` takes the label out of the accessibility tree as well
-       as off the screen, so below 600px this link and this button became
-       icon-only controls with no accessible name at all. Hide it visually and
-       keep it announced. */
-    .nav-actions .btn-ghost span,
-    .nav-actions .btn-icon span {
-        position: absolute;
-        width: 1px; height: 1px;
-        padding: 0; margin: -1px;
-        overflow: hidden;
-        clip: rect(0 0 0 0);
-        clip-path: inset(50%);
-        white-space: nowrap;
-        border: 0;
-    }
-}
-
-/* A link inside a source line, distinguished from the sentence around it by
-   colour alone: 1.1:1 against its own text. */
-.source a, .src a, footer a, .footnote a, .meta a {
-  text-decoration: underline;
-  text-underline-offset: 0.18em;
-}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+try { var t = localStorage.getItem('ind.theme'); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch (_) {}
+</script>
 </head>
 <body>
 
-<header class="im-header" role="banner">
-    <nav class="nav-container" aria-label="Main navigation">
-        <a class="logo-link" href="https://www.impactmojo.in" target="_blank" rel="noopener">
-            <img class="logo-mark" src="impactmojo-logo.png" alt="ImpactMojo logo" width="38" height="38" style="display:block;object-fit:cover;background:transparent">
-            <div class="logo-text">ImpactMojo<small>Development Know-How</small></div>
-        </a>
-        <ul class="nav-links" id="navLinks">
-            <li><a href="https://www.impactmojo.in" target="_blank" rel="noopener">Home</a></li>
-            <li class="has-dropdown">
-                <button class="nav-trigger" type="button" onclick="toggleDropdown(this)" aria-expanded="false">Showcase <iconify-icon icon="mdi:chevron-down"></iconify-icon></button>
-                <ul class="dropdown-menu">
-                    <li><a href="https://www.impactmojo.in/live-projects.html" target="_blank" rel="noopener">All Live Projects</a></li>
-                    <li><a href="https://devindicators.impactmojo.in" target="_blank" rel="noopener">Dev Indicators</a></li>
-                    <li><a href="https://sdgtracker.impactmojo.in" target="_blank" rel="noopener">SDG Tracker</a></li>
-                    <li><a href="https://climatetrace.impactmojo.in" target="_blank" rel="noopener">Climate TRACE</a></li>
-                    <li><a href="https://howindialives.impactmojo.in" target="_blank" rel="noopener">How India Lives</a></li>
-                </ul>
-            </li>
-            <li><a href="https://www.impactmojo.in/blog.html" target="_blank" rel="noopener">Blog</a></li>
-            <li><a href="https://www.impactmojo.in/podcast.html" target="_blank" rel="noopener">Podcast</a></li>
-        </ul>
-        <div class="nav-actions">
-            <button class="btn-icon theme-toggle" id="themeToggle" type="button" aria-label="Toggle colour theme">
-                <iconify-icon class="icon-light" icon="mdi:weather-sunny"></iconify-icon>
-                <iconify-icon class="icon-dark" icon="mdi:weather-night"></iconify-icon>
-            </button>
-            <a class="btn-ghost" href="https://www.impactmojo.in/live-projects.html" target="_blank" rel="noopener">
-                <iconify-icon icon="mdi:arrow-left"></iconify-icon><span>Live Projects</span>
-            </a>
-            <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Toggle menu" aria-expanded="false">
-                <iconify-icon icon="mdi:menu"></iconify-icon>
-            </button>
-        </div>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Adani and Ambani</a>
+    <nav class="nav" aria-label="Site">
+      <a href="tracker.html">Map</a>
+      <a href="projects.html">Projects and sources</a>
+      <a href="adani_research_map.html">Adani map</a>
+      <a href="#data">Download</a>
+      <button type="button" id="themeToggle" aria-label="Switch colour theme">Theme</button>
     </nav>
+  </div>
 </header>
 
-<section class="hero">
-    <h1>India <span>Industry Conglomerates</span></h1>
-    <p>Open-source geographic database of major Adani and Ambani infrastructure projects (1998–2026), searchable by sector, state, and government-support classification. Built for journalists, researchers, and accountability work.</p>
-    <div class="badge"><iconify-icon icon="mdi:database-outline"></iconify-icon> 386 projects · 1998–2026 · CC BY 4.0</div>
+<main>
+<div class="wrap">
+
+<section class="hero stack">
+  <div class="eyebrow">An open database · ImpactMojo</div>
+  <h1>India's largest business houses: <span class="a">Adani</span> and <span class="r">Ambani</span></h1>
+  <p class="lede">Where the Adani Group and Reliance Industries have built, bought or been awarded infrastructure, in India and abroad, from 1998 to the present. Every project names its sources and says how far it has been checked against them.</p>
+  <div class="actions">
+    <a class="btn primary" href="tracker.html">Open the map</a>
+    <a class="btn" href="projects.html">Read every project and its sources</a>
+  </div>
 </section>
 
-<main>
+<!--stats:start-->
+<section class="stack" aria-labelledby="h-houses">
+  <h2 id="h-houses">The two groups</h2>
+  <div class="houses">
+    <div class="house" style="--c:var(--adani)">
+      <div class="eyebrow">Adani Group</div>
+      <div class="n">310</div>
+      <p>projects across 36 sectors, 1998 to 2026</p>
+      <div class="meta">Largest: Cement 36 · Food/FMCG 26 · Renewable Energy 22</div>
+    </div>
+    <div class="house" style="--c:var(--reliance)">
+      <div class="eyebrow">Reliance Industries (Ambani)</div>
+      <div class="n">76</div>
+      <p>projects across 21 sectors, 1999 to 2026</p>
+      <div class="meta">Largest: Retail 10 · Telecom 7 · Oil &amp; Gas 7</div>
+    </div>
+  </div>
+</section>
 
-<div class="section-title"><iconify-icon icon="mdi:view-dashboard-outline"></iconify-icon>At a Glance</div>
-<div class="kpi-grid">
-    <div class="kpi-card" style="--kpi-color:var(--accent);--kpi-bg:color-mix(in srgb, var(--accent) 14%, transparent)">
-        <div class="kpi-icon"><iconify-icon icon="mdi:office-building-outline"></iconify-icon></div>
-        <div class="kpi-label">Projects tracked</div>
-        <div class="kpi-value">386</div>
-        <div class="kpi-trend">1998–2026, India + global</div>
-    </div>
-    <div class="kpi-card" style="--kpi-color:var(--accent-amber);--kpi-bg:color-mix(in srgb, var(--accent-amber) 14%, transparent)">
-        <div class="kpi-icon"><iconify-icon icon="mdi:domain"></iconify-icon></div>
-        <div class="kpi-label">Conglomerates</div>
-        <div class="kpi-value">2</div>
-        <div class="kpi-trend">Adani Group · Reliance / Ambani</div>
-    </div>
-    <div class="kpi-card" style="--kpi-color:var(--accent-2);--kpi-bg:color-mix(in srgb, var(--accent-2) 14%, transparent)">
-        <div class="kpi-icon"><iconify-icon icon="mdi:tag-multiple-outline"></iconify-icon></div>
-        <div class="kpi-label">Sectors covered</div>
-        <div class="kpi-value">12+</div>
-        <div class="kpi-trend">Power · Ports · Airports · Telecom · Roads · Renewables · Defence · Cement · Mining · Retail · Media · Petrochem</div>
-    </div>
-    <div class="kpi-card" style="--kpi-color:var(--accent-green);--kpi-bg:color-mix(in srgb, var(--accent-green) 14%, transparent)">
-        <div class="kpi-icon"><iconify-icon icon="mdi:license"></iconify-icon></div>
-        <div class="kpi-label">License</div>
-        <div class="kpi-value">CC BY 4.0</div>
-        <div class="kpi-trend">Free to share &amp; adapt · attribution required</div>
-    </div>
-</div>
+<section class="stack" aria-labelledby="h-check">
+  <h2 id="h-check">How far each project has been checked</h2>
+  <p class="lede">All 386 rows were checked against documents on 28 October 2026. The check removed 58 rows that were duplicates or not these groups' projects.</p>
+  <div class="bar" role="img" aria-label="41 verified, 184 verified with corrections, 79 partly verified, 82 not yet verified"><span class="s-ok" style="width:10.6218%"></span><span class="s-fix" style="width:47.6684%"></span><span class="s-part" style="width:20.4663%"></span><span class="s-none" style="width:21.2435%"></span></div>
+  <div class="key"><span><i class="sw s-ok"></i>Verified <b>41</b></span><span><i class="sw s-fix"></i>Verified with corrections <b>184</b></span><span><i class="sw s-part"></i>Partly verified <b>79</b></span><span><i class="sw s-none"></i>Not yet verified <b>82</b></span></div>
+</section>
 
-<div class="section-title"><iconify-icon icon="mdi:tools"></iconify-icon>Explore the Database</div>
-<div class="tools-grid">
-    <a class="tool-card" href="crony_tracker.html" style="--card-color:var(--accent)">
-        <div class="tool-card-icon"><iconify-icon icon="mdi:map-search-outline"></iconify-icon></div>
-        <h3>Crony Capitalism Tracker</h3>
-        <p>Map-based tracker with project locations, sector filters, government-support classification, and corporate-network linkage. The primary entry point for exploring the dataset.</p>
-        <div class="tool-card-footer">
-            <span class="tag">Leaflet · interactive map</span>
-            <iconify-icon class="tool-card-arrow" icon="mdi:arrow-top-right"></iconify-icon>
-        </div>
-    </a>
-    <a class="tool-card" href="adani_research_map.html" style="--card-color:var(--accent-amber)">
-        <div class="tool-card-icon"><iconify-icon icon="mdi:map-marker-radius-outline"></iconify-icon></div>
-        <h3>Adani Group Research Map</h3>
-        <p>Standalone deep-dive view focused on the Adani Group's 2000–2025 footprint, with annotated context and source links per project.</p>
-        <div class="tool-card-footer">
-            <span class="tag">Geographic · annotated</span>
-            <iconify-icon class="tool-card-arrow" icon="mdi:arrow-top-right"></iconify-icon>
-        </div>
-    </a>
-    <a class="tool-card" href="adani_database.csv" download style="--card-color:var(--accent-green)">
-        <div class="tool-card-icon"><iconify-icon icon="mdi:file-table-outline"></iconify-icon></div>
-        <h3>Download dataset (CSV)</h3>
-        <p>Full project-level dataset as CSV. Includes project name, conglomerate, sector, state, country, year, and government-support classification. Drop straight into pandas/R/Excel.</p>
-        <div class="tool-card-footer">
-            <span class="tag">~220 KB · 386 rows</span>
-            <iconify-icon class="tool-card-arrow" icon="mdi:download"></iconify-icon>
-        </div>
-    </a>
-    <a class="tool-card" href="adani_database_sourced.xlsx" download style="--card-color:var(--accent-purple)">
-        <div class="tool-card-icon"><iconify-icon icon="mdi:file-document-outline"></iconify-icon></div>
-        <h3>Sourced dataset (XLSX)</h3>
-        <p>Same data with per-row citations and verification notes. Useful when you need to follow each fact back to its primary source for journalistic or research work.</p>
-        <div class="tool-card-footer">
-            <span class="tag">~61 KB · annotated</span>
-            <iconify-icon class="tool-card-arrow" icon="mdi:download"></iconify-icon>
-        </div>
-    </a>
-</div>
+<section class="stack" aria-labelledby="h-sources">
+  <h2 id="h-sources">Where the information comes from</h2>
+  <div class="cols">
+    <div class="stack">
+      <p>The 386 projects cite 753 sources on 136 websites. 383 projects cite at least one. Each source is listed beside its project on the <a href="projects.html">projects page</a> and in the map's pop-ups.</p>
+      <p>Most citations are the companies' own pages and filings, regulators such as the Petroleum and Natural Gas Regulatory Board, and news reports. A company page shows what the company says it owns or runs. A regulator's record or a court document is stronger evidence where one exists.</p>
+    </div>
+    <div>
+      <div class="eyebrow" style="margin-bottom:10px">Most cited websites</div>
+      <ol class="domains"><li><span>adani.com</span><span>68</span></li><li><span>en.wikipedia.org</span><span>61</span></li><li><span>adaniports.com</span><span>46</span></li><li><span>gem.wiki</span><span>35</span></li><li><span>adanigreenenergy.com</span><span>34</span></li><li><span>cemnet.com</span><span>33</span></li><li><span>reuters.com</span><span>26</span></li><li><span>business.bofa.com</span><span>24</span></li><li><span>adanienterprises.com</span><span>22</span></li><li><span>ril.com</span><span>22</span></li></ol>
+    </div>
+  </div>
+</section>
+<!--stats:end-->
 
-<div class="about">
-    <h3>About this project</h3>
-    <p>This database compiles publicly-available information on major infrastructure projects associated with the Adani Group and Reliance / Ambani Group between 1998 and 2026. The intent is to give journalists, researchers, civil-society organisations, and curious citizens a single place to see how these conglomerates' footprints have grown across sectors, states, and political administrations.</p>
+<section class="stack" aria-labelledby="h-open">
+  <h2 id="h-open">What you can open</h2>
+  <div class="cards">
+    <a class="card" href="tracker.html">
+      <div class="eyebrow">Map</div>
+      <h3>Both groups on one map</h3>
+      <p>Filter by group, by India or abroad, and by government role, and play the years forward. Each pin opens its sources.</p>
+      <span class="go">Open the map</span>
+    </a>
+    <a class="card" href="projects.html">
+      <div class="eyebrow">Table</div>
+      <h3>Projects and sources</h3>
+      <p>Every project in one searchable list, with its status, the government role recorded, how far it was checked and links to each source.</p>
+      <span class="go">Read the list</span>
+    </a>
+    <a class="card" href="adani_research_map.html">
+      <div class="eyebrow">Map</div>
+      <h3>Adani Group, by government role</h3>
+      <p>The Adani projects alone, coloured by the kind of government role recorded for each.</p>
+      <span class="go">Open the Adani map</span>
+    </a>
+  </div>
+</section>
+
+<section class="stack" id="data" aria-labelledby="h-data">
+  <h2 id="h-data">Download the data</h2>
+  <div class="cards">
+    <a class="card" href="adani_database.csv" download>
+      <div class="eyebrow">CSV</div>
+      <h3>The full table</h3>
+      <p>One row per project: group, sector, place, year, status, government role, coordinates, details, sources and how far it was checked.</p>
+      <span class="go">Download CSV</span>
+    </a>
+    <a class="card" href="adani_database_sourced.xlsx" download>
+      <div class="eyebrow">Excel</div>
+      <h3>The same table as a workbook</h3>
+      <p>Identical to the CSV, for opening in a spreadsheet without an import step.</p>
+      <span class="go">Download XLSX</span>
+    </a>
+  </div>
+  <p class="note">Licensed CC BY 4.0. Cite it as: ImpactMojo, <em>India's largest business houses: Adani and Ambani</em>, industrygroups.impactmojo.in.</p>
+</section>
+
+<section class="stack" aria-labelledby="h-read">
+  <h2 id="h-read">Reading it fairly</h2>
+  <div class="cols">
     <ul>
-        <li><strong>Sources:</strong> company filings, MoEFCC clearances, court documents, Parliament Q&amp;A, RTI responses, audited media reporting.</li>
-        <li><strong>Government-support classification</strong> covers explicit subsidies, land allotments, regulatory exemptions, sovereign loan guarantees, and PLI scheme participation.</li>
-        <li><strong>Checked row by row on 28 October 2026</strong> against government documents, regulator and court records, company filings and established outlets. Of the 386 projects, 41 are verified as recorded, 184 were verified and corrected, 79 are partly verified and 82 are not yet verified; every map pin says which. The check removed 58 rows. 40 were not this group's projects: 33 city gas areas licensed to Indian Oil, GAIL, BPCL and other companies, three wind and solar assets Adani does not own, two cement plants and an India Cements stake held by other groups, and a coal trader that is not an Adani company. The other 18 were duplicates.</li>
-        <li><strong>Limits:</strong> private-equity stakes and offshore holding-company structures are partial; updates may lag where filings are delayed.</li>
-        <li><strong>Contributing:</strong> errata and additions welcome, see the GitHub repo linked in the footer.</li>
+      <li>A "government role" means a document shows one: a concession, a licence, a tender award, a state MoU, land from the state or public-sector finance. It is common in infrastructure and is not an allegation of wrongdoing.</li>
+      <li>Where nothing documented a role, the row says "No documented government role". That is a statement about the documents found, not proof that there was none.</li>
     </ul>
-</div>
+    <ul>
+      <li>Holdings through private equity and offshore companies are covered only in part.</li>
+      <li>This is independent research. It is not affiliated with either group or with any government. Corrections are welcome on <a href="https://github.com/Varnasr/industry-conglomerates-database/issues">GitHub</a>.</li>
+    </ul>
+  </div>
+</section>
 
+</div>
 </main>
 
-<footer class="im-footer">
-    <iconify-icon icon="mdi:airplane"></iconify-icon>
-    <span>An ImpactMojo Project</span>
-    <span class="sep">|</span>
-    <span>&copy; <span id="copyrightYear"></span> <a href="https://www.impactmojo.in" target="_blank" rel="noopener">ImpactMojo</a></span>
-    <span class="sep">|</span>
-    <span>Source code: <a href="https://github.com/Varnasr/Experiments/tree/main/industry-tracker" target="_blank" rel="noopener">GitHub</a></span>
-    <span class="sep">|</span>
-    <a href="https://www.impactmojo.in/live-projects.html" target="_blank" rel="noopener">More Live Projects</a>
+<footer class="foot">
+  <div class="wrap">
+    <span>&copy; <span id="copyrightYear"></span> <a href="https://www.impactmojo.in">ImpactMojo</a></span>
+    <a href="https://github.com/Varnasr/industry-conglomerates-database">Source and data on GitHub</a>
+    <a href="https://www.impactmojo.in/live-projects.html">More live projects</a>
+  </div>
 </footer>
 
 <script>
 document.getElementById('copyrightYear').textContent = new Date().getFullYear();
-
-function resolveTheme() {
-    let stored = null;
-    try { stored = localStorage.getItem('ind.theme'); } catch (_) {}
-    if (stored === 'dark' || stored === 'light') return stored;
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-}
-function applyTheme(t) {
-    document.documentElement.setAttribute('data-theme', t);
-    try { localStorage.setItem('ind.theme', t); } catch (_) {}
-}
-applyTheme(resolveTheme());
-
-document.getElementById('themeToggle').addEventListener('click', () => {
-    const cur = document.documentElement.getAttribute('data-theme');
-    applyTheme(cur === 'dark' ? 'light' : 'dark');
+document.getElementById('themeToggle').addEventListener('click', function () {
+  var root = document.documentElement;
+  var cur = root.getAttribute('data-theme') ||
+    (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  var next = cur === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  try { localStorage.setItem('ind.theme', next); } catch (_) {}
 });
-
-function toggleDropdown(btn) {
-    if (window.innerWidth > 880) return;
-    const li = btn.closest('.has-dropdown');
-    if (!li) return;
-    const open = li.classList.toggle('open');
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-}
-document.addEventListener('click', e => { if (!e.target.closest('.im-header')) document.querySelectorAll('.has-dropdown.open').forEach(li => li.classList.remove('open')); });
-
-document.getElementById('mobileMenuToggle').addEventListener('click', e => {
-    const nav = document.getElementById('navLinks');
-    const open = nav.classList.toggle('open');
-    e.currentTarget.setAttribute('aria-expanded', open ? 'true' : 'false');
-});
-
-if (window.matchMedia) {
-    window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
-        try { if (!localStorage.getItem('ind.theme')) applyTheme(e.matches ? 'light' : 'dark'); } catch (_) {}
-    });
-}
 </script>
 </body>
 </html>
