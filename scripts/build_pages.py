@@ -1,14 +1,20 @@
-"""Write the map data in crony_tracker.html and adani_research_map.html from adani_database.csv.
+"""Write every figure the pages show from adani_database.csv.
 
-The CSV is the record. Both pages carry a copy of it as `const markersData = [...]`
-on one line, and before this script those copies were edited by hand, so a
-correction in one place could miss the others.
+The CSV is the record. The two map pages carry a copy of it as
+`const markersData = [...]` on one line, projects.html as
+`const projectsData = [...]`, and index.html a block of counts between
+`<!--stats:start-->` and `<!--stats:end-->`. Before this script the copies were
+edited by hand, so a correction in one place could miss the others, and the
+landing page said 444 projects for months after the record was cut to 386.
 
-    python3 scripts/build_pages.py          rewrite both pages
-    python3 scripts/build_pages.py --check  fail if either page is stale
+    python3 scripts/build_pages.py          rewrite the pages
+    python3 scripts/build_pages.py --check  fail if any page is stale
 """
+import collections
 import csv
+import html
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -64,10 +70,15 @@ def rows():
         return list(csv.DictReader(fh))
 
 
+def row_id(r):
+    """A stable address for a project, so a map pin can link to its sources."""
+    return re.sub(r"[^a-z0-9]+", "-", f'{r["Group"]} {r["Project/Location"]} {r["State"]}'.lower()).strip("-")
+
+
 def tracker_item(r, intl):
     t = r["GOI_Support_Type"]
     return {
-        "group": r["Group"], "name": r["Project/Location"], "sector": r["Sector"], "state": r["State"],
+        "id": row_id(r), "group": r["Group"], "name": r["Project/Location"], "sector": r["Sector"], "state": r["State"],
         "year": int(r["Year"]), "status": r["Status"], "support_type": t, "support_note": r["Support_Note"],
         "modi_era": r["Modi_Era"], "lat": number(r["Latitude"]), "lng": number(r["Longitude"]),
         "details": r["Details"], "sources": r["Source_URLs"], "color": TRACKER_COLOURS[t],
@@ -83,8 +94,71 @@ def map_item(r, intl):
         "sector": r["Sector"], "state": r["State"], "year": int(r["Year"]), "status": r["Status"],
         "details": r["Details"], "support_type": t, "is_goi": t not in NO_GOI,
         "is_international": intl, "modi_era": r["Modi_Era"], "color": MAP_COLOURS[t],
+        "verification": r["Verification_Status"], "id": row_id(r), "sources": r["Source_URLs"],
+    }
+
+
+def project_item(r):
+    return {
+        "id": row_id(r), "group": r["Group"], "name": r["Project/Location"], "sector": r["Sector"],
+        "state": r["State"], "year": int(r["Year"]), "status": r["Status"],
+        "support_type": r["GOI_Support_Type"], "support_note": r["Support_Note"],
+        "details": r["Details"], "sources": r["Source_URLs"],
         "verification": r["Verification_Status"],
     }
+
+
+def urls(r):
+    return [u.strip() for u in r["Source_URLs"].split(" | ") if u.strip()]
+
+
+def stats_block(data):
+    """The counts on the landing page, written rather than typed."""
+    e = html.escape
+    out = ['<section class="stack" aria-labelledby="h-houses">', '  <h2 id="h-houses">The two groups</h2>', '  <div class="houses">']
+    for group, label, colour in (("Adani", "Adani Group", "adani"), ("Reliance", "Reliance Industries (Ambani)", "reliance")):
+        g = [r for r in data if r["Group"] == group]
+        years = [int(r["Year"]) for r in g]
+        top = collections.Counter(r["Sector"] for r in g).most_common(3)
+        out += [f'    <div class="house" style="--c:var(--{colour})">',
+                f'      <div class="eyebrow">{e(label)}</div>',
+                f'      <div class="n">{len(g)}</div>',
+                f'      <p>projects across {len({r["Sector"] for r in g})} sectors, {min(years)} to {max(years)}</p>',
+                '      <div class="meta">Largest: ' + " · ".join(f"{e(s)} {n}" for s, n in top) + '</div>',
+                '    </div>']
+    out += ['  </div>', '</section>', '']
+    order = [("Verified", "ok", "Verified"), ("Verified with corrections", "fix", "Verified with corrections"),
+             ("Partly verified", "part", "Partly verified"), ("Unverified", "none", "Not yet verified")]
+    c = collections.Counter(r["Verification_Status"] for r in data)
+    total = len(data)
+    label = ", ".join(f"{c[k]} {lab.lower()}" for k, _, lab in order)
+    out += ['<section class="stack" aria-labelledby="h-check">',
+            '  <h2 id="h-check">How far each project has been checked</h2>',
+            f'  <p class="lede">All {total} rows were checked against documents on 28 October 2026. The check removed 58 rows that were duplicates or not these groups\' projects.</p>',
+            f'  <div class="bar" role="img" aria-label="{label}">' + "".join(
+                f'<span class="s-{k}" style="width:{100 * c[s] / total:.4f}%"></span>' for s, k, _ in order) + '</div>',
+            '  <div class="key">' + "".join(f'<span><i class="sw s-{k}"></i>{lab} <b>{c[s]}</b></span>' for s, k, lab in order) + '</div>',
+            '</section>', '']
+    all_urls = [u for r in data for u in urls(r)]
+    hosts = collections.Counter(re.sub(r"^www\.", "", re.match(r"https?://([^/]+)", u).group(1)) for u in all_urls if re.match(r"https?://", u))
+    cited = sum(1 for r in data if urls(r))
+    out += ['<section class="stack" aria-labelledby="h-sources">',
+            '  <h2 id="h-sources">Where the information comes from</h2>',
+            '  <div class="cols">', '    <div class="stack">',
+            f'      <p>The {total} projects cite {len(all_urls)} sources on {len(hosts)} websites. {cited} projects cite at least one. Each source is listed beside its project on the <a href="projects.html">projects page</a> and in the map\'s pop-ups.</p>',
+            '      <p>Most citations are the companies\' own pages and filings, regulators such as the Petroleum and Natural Gas Regulatory Board, and news reports. A company page shows what the company says it owns or runs. A regulator\'s record or a court document is stronger evidence where one exists.</p>',
+            '    </div>', '    <div>', '      <div class="eyebrow" style="margin-bottom:10px">Most cited websites</div>',
+            '      <ol class="domains">' + "".join(f"<li><span>{e(h)}</span><span>{n}</span></li>" for h, n in hosts.most_common(10)) + '</ol>',
+            '    </div>', '  </div>', '</section>']
+    return "\n".join(out) + "\n"
+
+
+def splice_block(path, block):
+    text = path.read_text(encoding="utf-8")
+    a, b = "<!--stats:start-->\n", "<!--stats:end-->"
+    i = text.index(a) + len(a)
+    j = text.index(b)
+    return text[:i] + block + text[j:]
 
 
 def international(r):
@@ -93,9 +167,8 @@ def international(r):
     return not is_india(r["State"])
 
 
-def splice(path, items):
+def splice(path, items, key="const markersData = "):
     text = path.read_text(encoding="utf-8")
-    key = "const markersData = "
     i = text.index(key) + len(key)
     j = text.index("\n", i)
     line = json.dumps(items, ensure_ascii=False) + ";"
@@ -107,10 +180,14 @@ def main():
     data = rows()
     tracker = [tracker_item(r, international(r)) for r in data]
     research = [map_item(r, international(r)) for r in data if r["Group"] == "Adani"]
+    projects = [project_item(r) for r in data]
     stale = []
-    for name, items in (("crony_tracker.html", tracker), ("adani_research_map.html", research)):
+    for name, make in (("tracker.html", lambda p: splice(p, tracker)),
+                       ("adani_research_map.html", lambda p: splice(p, research)),
+                       ("projects.html", lambda p: splice(p, projects, "const projectsData = ")),
+                       ("index.html", lambda p: splice_block(p, stats_block(data)))):
         path = ROOT / name
-        new = splice(path, items)
+        new = make(path)
         if new != path.read_text(encoding="utf-8"):
             stale.append(name)
             if not check:
@@ -119,7 +196,7 @@ def main():
         print("FAIL - out of date with adani_database.csv: " + ", ".join(stale))
         print("Run: python3 scripts/build_pages.py")
         sys.exit(1)
-    print(("PASS - both map pages match" if check else "wrote both map pages from") +
+    print(("PASS - every page matches" if check else "wrote every page from") +
           " adani_database.csv (%d rows, %d Adani)" % (len(tracker), len(research)))
 
 
