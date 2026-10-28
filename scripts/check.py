@@ -174,6 +174,32 @@ def _inline_handlers_are_permitted():
 check("inline handlers match what the CSP permits", _inline_handlers_are_permitted)
 
 
+def _map_pages_match_csv():
+    """Both map pages carry the CSV inline. A correction to the CSV that does not
+    reach them leaves the map showing what the record no longer says."""
+    import subprocess
+    out = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_pages.py"), "--check"],
+                         capture_output=True, text=True)
+    assert out.returncode == 0, out.stdout.strip() or out.stderr.strip()
+    return out.stdout.strip().removeprefix("PASS - ")
+check("map pages match adani_database.csv", _map_pages_match_csv)
+
+
+def _rows_carry_their_check():
+    """Every row says how far it has been checked, and a row marked verified
+    names at least one source."""
+    import csv
+    with (ROOT / "adani_database.csv").open(newline="", encoding="utf-8") as fh:
+        rows = list(csv.DictReader(fh))
+    bad = [r["Project/Location"] for r in rows if not r["Verification_Status"].strip()]
+    assert not bad, f"{len(bad)} rows have no Verification_Status, e.g. {bad[:3]}"
+    bare = [r["Project/Location"] for r in rows
+            if r["Verification_Status"].startswith("Verified") and not r["Source_URLs"].strip()]
+    assert not bare, f"{len(bare)} rows marked verified name no source, e.g. {bare[:3]}"
+    return f"{len(rows)} rows"
+check("every row states how far it was checked", _rows_carry_their_check)
+
+
 print()
 if failures:
     print(f"FAIL - {len(failures)} check(s) failed")
