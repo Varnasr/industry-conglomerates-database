@@ -15,7 +15,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 CSV = ROOT / "adani_database.csv"
 
-NO_GOI = {"Private Acquisition (No GOI)", "Organic Growth (No GOI)", "International (Foreign Govt)"}
+NO_GOI = {"Private Acquisition (No GOI)", "Organic Growth (No GOI)", "International (Foreign Govt)",
+          "No documented government role"}
 
 # Marker colours by support type, as each page has always drawn them.
 TRACKER_COLOURS = {
@@ -23,14 +24,16 @@ TRACKER_COLOURS = {
     "SECI Solar Contract": "#32CD32", "Private Acquisition (No GOI)": "#1E90FF",
     "Regulatory License (PNGRB/AAI/etc)": "#FF6347", "Defence Production License": "#2F4F4F",
     "Organic Growth (No GOI)": "#4169E1", "State Government MoU": "#FF8C00",
-    "International (Foreign Govt)": "#9932CC",
+    "International (Foreign Govt)": "#9932CC", "No documented government role": "#94A3B8",
+    "Government land or asset transfer": "#B45309", "Public sector finance": "#0D9488",
 }
 MAP_COLOURS = {
     "Direct Govt Contract/PPP": "#DC143C", "Policy/Regulatory Benefit": "#FFD700",
     "SECI Solar Contract": "#32CD32", "Private Acquisition (No GOI)": "#4169E1",
     "Regulatory License (PNGRB/AAI/etc)": "#FF4500", "Defence Production License": "#006400",
     "Organic Growth (No GOI)": "#1E90FF", "State Government MoU": "#FF6347",
-    "International (Foreign Govt)": "#9932CC",
+    "International (Foreign Govt)": "#9932CC", "No documented government role": "#94A3B8",
+    "Government land or asset transfer": "#B45309", "Public sector finance": "#0D9488",
 }
 
 INDIA = {

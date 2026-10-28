@@ -122,6 +122,32 @@ def _covers_usage():
 check("the CSP allows everything the page actually loads", _covers_usage)
 
 
+def _every_page_covered():
+    """The header governs every page, not just index.html. Checking only the
+    landing page let the CSP be tightened in September 2026 while both map
+    pages still loaded Leaflet from unpkg.com and tiles from carto: the maps
+    were blank in production, with nothing but a console message to show it."""
+    blocked = []
+    for page in sorted(ROOT.glob("*.html")):
+        text = page.read_text(encoding="utf-8")
+        used = [
+            ("script-src", origins(re.findall(r'<script[^>]+src="([^"]+)"', text))),
+            ("style-src", origins(
+                re.findall(r'<link[^>]+rel="stylesheet"[^>]*href="([^"]+)"', text)
+                + re.findall(r'<link[^>]+href="([^"]+)"[^>]*rel="stylesheet"', text))),
+            ("img-src", origins(re.findall(r'<img[^>]+src="([^"]+)"', text)
+                                + re.findall(r"""['"](https://[^'"]+\{z\}[^'"]*)['"]""", text))),
+        ]
+        for directive, found in used:
+            allowed = head.get(directive, set()) | head.get("default-src", set())
+            for origin in found:
+                if origin not in allowed:
+                    blocked.append(f"{page.name} {directive}: {origin}")
+    assert not blocked, "loaded but not allowed by the header CSP: " + ", ".join(blocked)
+    return f"{len(list(ROOT.glob('*.html')))} pages, map tiles included"
+check("the header CSP allows what every page loads", _every_page_covered)
+
+
 def _fetch_targets_allowed():
     """Iconify fetches its icon data at runtime, which connect-src governs."""
     conn = meta.get("connect-src", set()) | meta.get("default-src", set())
@@ -198,6 +224,33 @@ def _rows_carry_their_check():
     assert not bare, f"{len(bare)} rows marked verified name no source, e.g. {bare[:3]}"
     return f"{len(rows)} rows"
 check("every row states how far it was checked", _rows_carry_their_check)
+
+
+def _stated_counts_match():
+    """The project counts written into the pages are typed, not computed, so
+    they are compared with the CSV. They read 444 for months after the record
+    was cut to 386."""
+    import csv
+    with (ROOT / "adani_database.csv").open(newline="", encoding="utf-8") as fh:
+        rows = list(csv.DictReader(fh))
+    total = len(rows)
+    adani = [r for r in rows if r["Group"] == "Adani"]
+    tracker = (ROOT / "crony_tracker.html").read_text(encoding="utf-8")
+    research = (ROOT / "adani_research_map.html").read_text(encoding="utf-8")
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    want = {
+        "index.html badge": (re.search(r"(\d+) projects · ", HTML), total),
+        "index.html KPI": (re.search(r'kpi-value">(\d+)</div>\s*<div class="kpi-label">Projects', HTML)
+                           or re.search(r'Projects tracked</div>\s*<div class="kpi-value">(\d+)', HTML), total),
+        "index.html download tag": (re.search(r"· (\d+) rows", HTML), total),
+        "crony_tracker.html": (re.search(r"(\d+) Projects Tracked", tracker), total),
+        "adani_research_map.html": (re.search(r'stat-num">(\d+)</div><div class="stat-label">Projects', research), len(adani)),
+        "README.md": (re.search(r"database of (\d+) major", readme), total),
+    }
+    wrong = [f"{k} says {m.group(1)}, CSV has {n}" for k, (m, n) in want.items() if not m or int(m.group(1)) != n]
+    assert not wrong, "; ".join(wrong)
+    return f"{total} projects, {len(adani)} Adani"
+check("stated project counts match the CSV", _stated_counts_match)
 
 
 print()

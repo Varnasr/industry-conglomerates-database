@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.iconify.design https://api.iconify.design https://api.simplesvg.com https://api.unisvg.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com; connect-src 'self' https://api.iconify.design https://api.simplesvg.com https://api.unisvg.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-ancestors 'none'; base-uri 'self';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.iconify.design https://api.iconify.design https://api.simplesvg.com https://api.unisvg.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com https://server.arcgisonline.com; connect-src 'self' https://api.iconify.design https://api.simplesvg.com https://api.unisvg.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com; frame-ancestors 'none'; base-uri 'self';">
 
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-JRCMEB9TBW"></script>
 <script>
@@ -13,7 +13,7 @@
   gtag('config', 'G-JRCMEB9TBW', { anonymize_ip: true });
 </script>
 
-<meta name="description" content="India Industry Conglomerates Tracker, open-source geographic database of major Adani and Ambani infrastructure projects (1999–2026). An ImpactMojo project.">
+<meta name="description" content="India Industry Conglomerates Tracker, open-source geographic database of major Adani and Ambani infrastructure projects (1998–2026). An ImpactMojo project.">
 <meta property="og:title" content="Industry Conglomerates Tracker | ImpactMojo">
 <meta property="og:description" content="Open-source database of major Adani and Ambani infrastructure projects across India and globally, searchable, filterable, with government-support classification.">
 <meta property="og:type" content="website">
@@ -221,8 +221,8 @@ main { max-width: 1280px; margin: 0 auto; padding: 1.75rem 1.5rem; }
 
 <section class="hero">
     <h1>India <span>Industry Conglomerates</span></h1>
-    <p>Open-source geographic database of major Adani and Ambani infrastructure projects (1999–2026), searchable by sector, state, and government-support classification. Built for journalists, researchers, and accountability work.</p>
-    <div class="badge"><iconify-icon icon="mdi:database-outline"></iconify-icon> 444 projects · 1999–2026 · CC BY 4.0</div>
+    <p>Open-source geographic database of major Adani and Ambani infrastructure projects (1998–2026), searchable by sector, state, and government-support classification. Built for journalists, researchers, and accountability work.</p>
+    <div class="badge"><iconify-icon icon="mdi:database-outline"></iconify-icon> 386 projects · 1998–2026 · CC BY 4.0</div>
 </section>
 
 <main>
@@ -232,8 +232,8 @@ main { max-width: 1280px; margin: 0 auto; padding: 1.75rem 1.5rem; }
     <div class="kpi-card" style="--kpi-color:var(--accent);--kpi-bg:color-mix(in srgb, var(--accent) 14%, transparent)">
         <div class="kpi-icon"><iconify-icon icon="mdi:office-building-outline"></iconify-icon></div>
         <div class="kpi-label">Projects tracked</div>
-        <div class="kpi-value">444</div>
-        <div class="kpi-trend">1999–2026, India + global</div>
+        <div class="kpi-value">386</div>
+        <div class="kpi-trend">1998–2026, India + global</div>
     </div>
     <div class="kpi-card" style="--kpi-color:var(--accent-amber);--kpi-bg:color-mix(in srgb, var(--accent-amber) 14%, transparent)">
         <div class="kpi-icon"><iconify-icon icon="mdi:domain"></iconify-icon></div>
@@ -280,7 +280,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 1.75rem 1.5rem; }
         <h3>Download dataset (CSV)</h3>
         <p>Full project-level dataset as CSV. Includes project name, conglomerate, sector, state, country, year, and government-support classification. Drop straight into pandas/R/Excel.</p>
         <div class="tool-card-footer">
-            <span class="tag">~185 KB · 444 rows</span>
+            <span class="tag">~220 KB · 386 rows</span>
             <iconify-icon class="tool-card-arrow" icon="mdi:download"></iconify-icon>
         </div>
     </a>
@@ -297,10 +297,11 @@ main { max-width: 1280px; margin: 0 auto; padding: 1.75rem 1.5rem; }
 
 <div class="about">
     <h3>About this project</h3>
-    <p>This database compiles publicly-available information on major infrastructure projects associated with the Adani Group and Reliance / Ambani Group between 1999 and 2026. The intent is to give journalists, researchers, civil-society organisations, and curious citizens a single place to see how these conglomerates' footprints have grown across sectors, states, and political administrations.</p>
+    <p>This database compiles publicly-available information on major infrastructure projects associated with the Adani Group and Reliance / Ambani Group between 1998 and 2026. The intent is to give journalists, researchers, civil-society organisations, and curious citizens a single place to see how these conglomerates' footprints have grown across sectors, states, and political administrations.</p>
     <ul>
         <li><strong>Sources:</strong> company filings, MoEFCC clearances, court documents, Parliament Q&amp;A, RTI responses, audited media reporting.</li>
         <li><strong>Government-support classification</strong> covers explicit subsidies, land allotments, regulatory exemptions, sovereign loan guarantees, and PLI scheme participation.</li>
+        <li><strong>Checked row by row on 28 October 2026</strong> against government documents, regulator and court records, company filings and established outlets. Of the 386 projects, 41 are verified as recorded, 184 were verified and corrected, 79 are partly verified and 82 are not yet verified; every map pin says which. The check removed 58 rows. 40 were not this group's projects: 33 city gas areas licensed to Indian Oil, GAIL, BPCL and other companies, three wind and solar assets Adani does not own, two cement plants and an India Cements stake held by other groups, and a coal trader that is not an Adani company. The other 18 were duplicates.</li>
         <li><strong>Limits:</strong> private-equity stakes and offshore holding-company structures are partial; updates may lag where filings are delayed.</li>
         <li><strong>Contributing:</strong> errata and additions welcome, see the GitHub repo linked in the footer.</li>
     </ul>
