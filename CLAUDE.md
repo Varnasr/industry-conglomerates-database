@@ -11,11 +11,33 @@ All three pages share `assets/site.css`, with light and dark tokens; the map swi
 ```bash
 python3 scripts/check.py        # static checks, run by CI
 python3 scripts/build_pages.py  # write the CSV into every page
+python3 scripts/build_paper.py  # write paper/, findings/ and data/paper/ pages from data/paper/*.csv
 python3 -m http.server 8000     # then open http://localhost:8000
 ```
 
 Note that a local server does **not** send the `netlify.toml` headers, so the
 Content-Security-Policy you see locally is only the `<meta http-equiv>` one.
+
+## The paper
+
+`paper/index.html` (Part 1, concentration), `findings/<slug>/index.html` (one
+finding per page) and `data/paper/index.html` are written by
+`scripts/build_paper.py` from five tables in `data/paper/`: ports and airports,
+power, telecom and city gas, cement-refining-retail-media, and economic weight.
+Every number in the prose is computed in the script from those rows; do not
+type a figure into the text. `check.py` runs `--check`, and fails if any row
+names no document or, unless it is a calculation, no address or page.
+
+Rows whose `source_title` begins "Derived" are calculations, and the pages say
+so. The rules the numbers follow: official denominators only; company figures
+count subsidiaries in full, so the pages say "runs", not "owns"; national
+shares only; Reliance Power (Anil Ambani) is never Reliance Industries.
+
+What could not be fetched from outside India, and is still owed to the paper:
+the CCI's detailed orders (Reliance-Disney, Holcim, Sanghi, Penna, Orient, and
+Case 03 of 2017 against Jio), PNGRB's monthly city gas reports, and the
+parliamentary answers on the airport leases. Parts 2 (how the assets were
+obtained) and 3 (finance and risk) are not written yet.
 
 ## The CSP is declared twice, and that is the thing to get right
 
