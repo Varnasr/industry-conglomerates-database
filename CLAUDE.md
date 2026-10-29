@@ -2,9 +2,9 @@
 
 Shared engineering standard: @.claude/engineering-standards.md. It applies to all work in this repository. This file adds what is specific to the project, and wins where the two disagree.
 
-Project tracking for the Adani and Reliance groups: a landing page, two map pages, a projects-and-sources table (`projects.html`) and the dataset behind them. Static, deployed on Netlify. Every figure the pages show is written from the CSV by `scripts/build_pages.py`: the map data, the table data, and the counts on `index.html` between `<!--stats:start-->` and `<!--stats:end-->`. Do not type a count into a page; `--check` fails if one drifts.
+Project tracking for the Adani and Reliance groups: a landing page, one map (`tracker.html`), a projects-and-sources table (`projects.html`) and the dataset behind them. Static, deployed on Netlify. Every figure the pages show is written from the CSV by `scripts/build_pages.py`: the map data, the table data, and the counts on `index.html` between `<!--stats:start-->` and `<!--stats:end-->`. Do not type a count into a page; `--check` fails if one drifts.
 
-`index.html` and `projects.html` share `assets/site.css`, with light and dark tokens. The map pages keep their own styles.
+All three pages share `assets/site.css`, with light and dark tokens; the map switches its Esri base map with the theme. The Adani-only map (`adani_research_map.html`) was folded into the one map in October 2026: `/adani_research_map.html` 301s to `tracker.html?group=Adani&colour=role`, and the map reads `group` and `colour` from the address. Government roles are coloured in five families (`ROLE_FAMILY` in `build_pages.py`); the pop-up always gives the exact type.
 
 ## Commands
 
@@ -56,10 +56,10 @@ if the two drift apart again.
 
 ## Data
 
-`adani_database.csv` is the record. `tracker.html` (all rows) and
-`adani_research_map.html` (Adani rows) each carry it inline as
-`const markersData = [...]` on one line, written by `scripts/build_pages.py`.
-Edit the CSV, then run the script; `scripts/check.py` fails if either page is
+`adani_database.csv` is the record. `tracker.html` carries it inline as
+`const markersData = [...]` on one line and `projects.html` as
+`const projectsData = [...]`, both written by `scripts/build_pages.py`.
+Edit the CSV, then run the script; `scripts/check.py` fails if a page is
 stale. Before October 2026 the copies were edited by hand.
 `adani_database_sourced.xlsx` is the same table for download; regenerate it
 from the CSV when the CSV changes.
@@ -73,9 +73,10 @@ session's web-search budget ran out; their notes say what to check.
 
 `GOI_Support_Type` records only a documented government role. A row with
 nothing documented says "No documented government role", which the pages
-count as not government-linked. The Modi-era share on the research map is
-computed from the data at load, not typed: it was 68% before the check and
-48% after it, because about fifty support claims had no document behind them.
+count as not government-linked. The map's share of projects from 2014 on with a government role is computed
+from the data at load, not typed. On the Adani rows it was 68% before the
+check and 48% after it, because about fifty support claims had no document
+behind them.
 
 The page derives its most recent year from the clock rather than pinning one, so
 it advances on its own. A check fails if a literal year is introduced, because

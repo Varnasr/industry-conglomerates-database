@@ -8,5 +8,4 @@ classification. Companion pages:
 
 - `tracker.html`: project map of both groups
 - `projects.html`: every project with its status, government role, check status and sources
-- `adani_research_map.html`: research map view
 - `adani_database.csv` / `.xlsx`: raw dataset

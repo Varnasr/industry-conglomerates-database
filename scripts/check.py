@@ -235,13 +235,9 @@ def _stated_counts_match():
         rows = list(csv.DictReader(fh))
     total = len(rows)
     adani = [r for r in rows if r["Group"] == "Adani"]
-    tracker = (ROOT / "tracker.html").read_text(encoding="utf-8")
-    research = (ROOT / "adani_research_map.html").read_text(encoding="utf-8")
     readme = (ROOT / "README.md").read_text(encoding="utf-8")
-    # index.html's counts are written by build_pages.py and held by its --check.
+    # The pages' counts are written by build_pages.py or computed at load.
     want = {
-        "tracker.html": (re.search(r"(\d+) Projects Tracked", tracker), total),
-        "adani_research_map.html": (re.search(r'stat-num">(\d+)</div><div class="stat-label">Projects', research), len(adani)),
         "README.md": (re.search(r"database of (\d+) major", readme), total),
     }
     wrong = [f"{k} states no count" if not m else f"{k} says {m.group(1)}, CSV has {n}"

@@ -1,6 +1,6 @@
 """Write every figure the pages show from adani_database.csv.
 
-The CSV is the record. The two map pages carry a copy of it as
+The CSV is the record. tracker.html carries a copy of it as
 `const markersData = [...]` on one line, projects.html as
 `const projectsData = [...]`, and index.html a block of counts between
 `<!--stats:start-->` and `<!--stats:end-->`. Before this script the copies were
@@ -24,22 +24,16 @@ CSV = ROOT / "adani_database.csv"
 NO_GOI = {"Private Acquisition (No GOI)", "Organic Growth (No GOI)", "International (Foreign Govt)",
           "No documented government role"}
 
-# Marker colours by support type, as each page has always drawn them.
-TRACKER_COLOURS = {
-    "Direct Govt Contract/PPP": "#DC143C", "Policy/Regulatory Benefit": "#FFD700",
-    "SECI Solar Contract": "#32CD32", "Private Acquisition (No GOI)": "#1E90FF",
-    "Regulatory License (PNGRB/AAI/etc)": "#FF6347", "Defence Production License": "#2F4F4F",
-    "Organic Growth (No GOI)": "#4169E1", "State Government MoU": "#FF8C00",
-    "International (Foreign Govt)": "#9932CC", "No documented government role": "#94A3B8",
-    "Government land or asset transfer": "#B45309", "Public sector finance": "#0D9488",
-}
-MAP_COLOURS = {
-    "Direct Govt Contract/PPP": "#DC143C", "Policy/Regulatory Benefit": "#FFD700",
-    "SECI Solar Contract": "#32CD32", "Private Acquisition (No GOI)": "#4169E1",
-    "Regulatory License (PNGRB/AAI/etc)": "#FF4500", "Defence Production License": "#006400",
-    "Organic Growth (No GOI)": "#1E90FF", "State Government MoU": "#FF6347",
-    "International (Foreign Govt)": "#9932CC", "No documented government role": "#94A3B8",
-    "Government land or asset transfer": "#B45309", "Public sector finance": "#0D9488",
+# The map colours government roles by family; the pop-up gives the exact type.
+ROLE_FAMILY = {
+    "Direct Govt Contract/PPP": "contract", "SECI Solar Contract": "contract",
+    "Regulatory License (PNGRB/AAI/etc)": "licence", "Policy/Regulatory Benefit": "licence",
+    "Defence Production License": "licence",
+    "State Government MoU": "state", "Government land or asset transfer": "state",
+    "Public sector finance": "state",
+    "International (Foreign Govt)": "foreign",
+    "Private Acquisition (No GOI)": "none", "Organic Growth (No GOI)": "none",
+    "No documented government role": "none",
 }
 
 INDIA = {
@@ -81,20 +75,9 @@ def tracker_item(r, intl):
         "id": row_id(r), "group": r["Group"], "name": r["Project/Location"], "sector": r["Sector"], "state": r["State"],
         "year": int(r["Year"]), "status": r["Status"], "support_type": t, "support_note": r["Support_Note"],
         "modi_era": r["Modi_Era"], "lat": number(r["Latitude"]), "lng": number(r["Longitude"]),
-        "details": r["Details"], "sources": r["Source_URLs"], "color": TRACKER_COLOURS[t],
+        "details": r["Details"], "sources": r["Source_URLs"], "role_family": ROLE_FAMILY[t],
         "is_goi": t not in NO_GOI, "is_international": intl,
         "verification": r["Verification_Status"],
-    }
-
-
-def map_item(r, intl):
-    t = r["GOI_Support_Type"]
-    return {
-        "name": r["Project/Location"], "lat": number(r["Latitude"]), "lng": number(r["Longitude"]),
-        "sector": r["Sector"], "state": r["State"], "year": int(r["Year"]), "status": r["Status"],
-        "details": r["Details"], "support_type": t, "is_goi": t not in NO_GOI,
-        "is_international": intl, "modi_era": r["Modi_Era"], "color": MAP_COLOURS[t],
-        "verification": r["Verification_Status"], "id": row_id(r), "sources": r["Source_URLs"],
     }
 
 
@@ -179,11 +162,9 @@ def main():
     check = "--check" in sys.argv[1:]
     data = rows()
     tracker = [tracker_item(r, international(r)) for r in data]
-    research = [map_item(r, international(r)) for r in data if r["Group"] == "Adani"]
     projects = [project_item(r) for r in data]
     stale = []
     for name, make in (("tracker.html", lambda p: splice(p, tracker)),
-                       ("adani_research_map.html", lambda p: splice(p, research)),
                        ("projects.html", lambda p: splice(p, projects, "const projectsData = ")),
                        ("index.html", lambda p: splice_block(p, stats_block(data)))):
         path = ROOT / name
@@ -197,7 +178,7 @@ def main():
         print("Run: python3 scripts/build_pages.py")
         sys.exit(1)
     print(("PASS - every page matches" if check else "wrote every page from") +
-          " adani_database.csv (%d rows, %d Adani)" % (len(tracker), len(research)))
+          " adani_database.csv (%d rows)" % len(tracker))
 
 
 if __name__ == "__main__":
