@@ -299,3 +299,23 @@ a.card:hover { border-color: var(--ink-3); }
   .chart { padding: 14px 12px 10px; }
   .dict { grid-template-columns: 1fr; }
 }
+
+/* Dated event tables in Parts 2 and 3 */
+.events { margin: 20px 0; max-width: 980px; }
+.events table { border-collapse: collapse; font-size: 14px; width: 100%; min-width: 640px; }
+.events th, .events td { text-align: left; vertical-align: top; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line); }
+.events thead th { font: 600 12px var(--sans); text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); }
+.ev-date { font: 13px var(--mono); white-space: nowrap; color: var(--ink-2); }
+.ev-val { font: 13px var(--mono); color: var(--ink-2); margin-top: 2px; }
+.ev-note { color: var(--ink-2); margin-top: 4px; font-size: 13px; }
+.ev-src { font-size: 13px; color: var(--ink-3); max-width: 340px; overflow-wrap: anywhere; }
+.ev-src a { color: var(--reliance); }
+.events .chip { margin-top: 4px; }
+.paper-sec .events, .finding .events { max-width: none; }
+@media (max-width: 640px) {
+  .events table { min-width: 0; }
+  .events thead { display: none; }
+  .events tr { display: block; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .events td { display: block; border: 0; padding: 2px 0; }
+  .ev-src { max-width: none; }
+}

@@ -20,24 +20,34 @@ Content-Security-Policy you see locally is only the `<meta http-equiv>` one.
 
 ## The paper
 
-`paper/index.html` (Part 1, concentration), `findings/<slug>/index.html` (one
-finding per page) and `data/paper/index.html` are written by
-`scripts/build_paper.py` from five tables in `data/paper/`: ports and airports,
-power, telecom and city gas, cement-refining-retail-media, and economic weight.
-Every number in the prose is computed in the script from those rows; do not
-type a figure into the text. `check.py` runs `--check`, and fails if any row
-names no document or, unless it is a calculation, no address or page.
+`paper/index.html` (Part 1, concentration), `paper/part-2/` (how the assets
+were obtained), `paper/part-3/` (finance and risk), `findings/<slug>/index.html`
+(one finding per page, 23 of them) and `data/paper/index.html` are written by
+`scripts/build_paper.py` from the tables in `data/paper/`. Part 1 reads ports
+and airports, power, telecom and city gas, cement-refining-retail-media and
+economic weight. Parts 2 and 3 read `airports_ports`, `coal_power_land`,
+`reliance_state`, `finance` and `legal`, and their prose lives in
+`scripts/paper_parts.py`. Every number in the prose is computed from those rows;
+do not type a figure into the text. `check.py` runs `--check`, and fails if any
+row names no document or, unless it is a calculation, no address or page.
 
 Rows whose `source_title` begins "Derived" are calculations, and the pages say
 so. The rules the numbers follow: official denominators only; company figures
 count subsidiaries in full, so the pages say "runs", not "owns"; national
 shares only; Reliance Power (Anil Ambani) is never Reliance Industries.
 
+Parts 2 and 3 keep three kinds of statement apart: decisions and holdings,
+findings by an auditor or regulator, and allegations. A row resting on the
+press alone carries a "Secondary source" chip (`reported()` in
+`paper_parts.py`; the airports table records this in its `publisher` column)
+and never carries a finding. No page claims a motive.
+
 What could not be fetched from outside India, and is still owed to the paper:
 the CCI's detailed orders (Reliance-Disney, Holcim, Sanghi, Penna, Orient, and
-Case 03 of 2017 against Jio), PNGRB's monthly city gas reports, and the
-parliamentary answers on the airport leases. Parts 2 (how the assets were
-obtained) and 3 (finance and risk) are not written yet.
+Case 03 of 2017 against Jio), PNGRB's monthly city gas reports, the per-passenger
+bids at five of the six airports leased in 2019-20, the DEA and NITI Aayog notes
+of 10 December 2018 themselves, AERA tariff orders, and the ECI electoral bond
+files (the purchaser file was read from a copy; recheck against eci.gov.in).
 
 ## The CSP is declared twice, and that is the thing to get right
 
