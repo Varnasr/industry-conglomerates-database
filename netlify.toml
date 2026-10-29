@@ -29,3 +29,10 @@
   from = "/crony_tracker.html"
   to = "/tracker.html"
   status = 301
+
+# The Adani map was a separate page until October 2026. It is now a view of the
+# one map.
+[[redirects]]
+  from = "/adani_research_map.html"
+  to = "/tracker.html?group=Adani&colour=role"
+  status = 301

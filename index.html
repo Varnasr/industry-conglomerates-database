@@ -36,7 +36,6 @@ try { var t = localStorage.getItem('ind.theme'); if (t === 'dark' || t === 'ligh
     <nav class="nav" aria-label="Site">
       <a href="tracker.html">Map</a>
       <a href="projects.html">Projects and sources</a>
-      <a href="adani_research_map.html">Adani map</a>
       <a href="#data">Download</a>
       <button type="button" id="themeToggle" aria-label="Switch colour theme">Theme</button>
     </nav>
@@ -103,7 +102,7 @@ try { var t = localStorage.getItem('ind.theme'); if (t === 'dark' || t === 'ligh
     <a class="card" href="tracker.html">
       <div class="eyebrow">Map</div>
       <h3>Both groups on one map</h3>
-      <p>Filter by group, by India or abroad, and by government role, and play the years forward. Each pin opens its sources.</p>
+      <p>Filter by group and by India or abroad, colour by group, government role or check status, and play the years forward. Each pin opens its sources.</p>
       <span class="go">Open the map</span>
     </a>
     <a class="card" href="projects.html">
@@ -112,10 +111,10 @@ try { var t = localStorage.getItem('ind.theme'); if (t === 'dark' || t === 'ligh
       <p>Every project in one searchable list, with its status, the government role recorded, how far it was checked and links to each source.</p>
       <span class="go">Read the list</span>
     </a>
-    <a class="card" href="adani_research_map.html">
+    <a class="card" href="tracker.html?group=Adani&amp;colour=role">
       <div class="eyebrow">Map</div>
       <h3>Adani Group, by government role</h3>
-      <p>The Adani projects alone, coloured by the kind of government role recorded for each.</p>
+      <p>The same map showing the Adani projects alone, coloured by the kind of government role recorded for each.</p>
       <span class="go">Open the Adani map</span>
     </a>
   </div>
