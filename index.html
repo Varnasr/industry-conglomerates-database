@@ -25,7 +25,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/site.css">
 <script>
-try { var t = localStorage.getItem('ind.theme'); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t); } catch (_) {}
+try { var t = localStorage.getItem('ind.theme'); if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+      if (localStorage.getItem('reading-font') === 'opendyslexic') document.documentElement.classList.add('dyslexic-font'); } catch (_) {}
 </script>
 </head>
 <body>
@@ -33,12 +34,24 @@ try { var t = localStorage.getItem('ind.theme'); if (t === 'dark' || t === 'ligh
 <header class="top">
   <div class="wrap">
     <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Adani and Ambani</a>
-    <nav class="nav" aria-label="Site">
+    <nav class="nav" id="siteNav" aria-label="Site">
       <a href="tracker.html">Map</a>
       <a href="projects.html">Projects and sources</a>
-      <a href="#data">Download</a>
-      <button type="button" id="themeToggle" aria-label="Switch colour theme">Theme</button>
+      <a href="index.html#data">Download</a>
     </nav>
+    <div class="tools">
+      <button type="button" class="tool" id="themeBtn" aria-label="Switch colour theme"><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><span class="tool-l">Theme</span></button>
+      <button type="button" class="tool" id="displayBtn" aria-expanded="false" aria-controls="displayPanel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 19 8 5l5 14M4.8 14h6.4M14.5 19l3.5-9 3.5 9M15.6 16.2h4.8"/></svg><span class="tool-l">Display</span></button>
+      <button type="button" class="tool menu-btn" id="menuBtn" aria-expanded="false" aria-controls="siteNav"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span class="tool-l">Menu</span></button>
+    </div>
+    <div class="display-panel" id="displayPanel" role="group" aria-label="Display settings" hidden>
+      <div class="dp-row"><span class="dp-l" id="dp-theme">Colour theme</span>
+        <div class="seg" role="group" aria-labelledby="dp-theme"><button type="button" data-theme-choice="system">Device</button><button type="button" data-theme-choice="light">Light</button><button type="button" data-theme-choice="dark">Dark</button></div></div>
+      <div class="dp-row"><span class="dp-l" id="dp-font">Reading font</span>
+        <div class="seg" role="group" aria-labelledby="dp-font"><button type="button" data-font-choice="standard">Standard</button><button type="button" data-font-choice="dyslexic">Dyslexia-friendly</button></div>
+        <p class="dp-note">OpenDyslexic, with wider letter, word and line spacing. Remembered on this device.</p></div>
+      <button type="button" class="dp-done" data-close>Done</button>
+    </div>
   </div>
 </header>
 
@@ -164,16 +177,6 @@ try { var t = localStorage.getItem('ind.theme'); if (t === 'dark' || t === 'ligh
   </div>
 </footer>
 
-<script>
-document.getElementById('copyrightYear').textContent = new Date().getFullYear();
-document.getElementById('themeToggle').addEventListener('click', function () {
-  var root = document.documentElement;
-  var cur = root.getAttribute('data-theme') ||
-    (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-  var next = cur === 'dark' ? 'light' : 'dark';
-  root.setAttribute('data-theme', next);
-  try { localStorage.setItem('ind.theme', next); } catch (_) {}
-});
-</script>
+<script src="assets/site.js"></script>
 </body>
 </html>
