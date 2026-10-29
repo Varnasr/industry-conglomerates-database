@@ -28,7 +28,9 @@ def table(name):
         return list(csv.DictReader(fh))
 
 
-T = {n: table(n) for n in ("ports_airports", "power", "gas_telecom", "cement_retail_media", "macro_weight")}
+T = {n: table(n) for n in ("ports_airports", "power", "gas_telecom", "cement_retail_media", "macro_weight",
+                         "coal_power_land", "reliance_state", "finance", "legal", "airports_ports")
+     if (DATA / f"{n}.csv").exists()}
 
 
 def pick(name, metric, entity=None, sector=None):
@@ -104,6 +106,8 @@ class Chart:
     def fmt(self, v):
         if self.unit == "%":
             return f"{v:.1f}%"
+        if self.unit == "x":
+            return f"{v:.2f}x"
         return f"{v:,.0f}"
 
     def svg(self):
@@ -118,7 +122,7 @@ class Chart:
         while v <= self.ymax + 1e-9:
             yy = y(v)
             o.append(f'<line x1="{L}" x2="{L + pw}" y1="{yy:.1f}" y2="{yy:.1f}" class="grid"/>')
-            lab = f"{v:g}%" if self.unit == "%" else f"{v:,.0f}"
+            lab = f"{v:g}%" if self.unit == "%" else f"{v:g}x" if self.unit == "x" else f"{v:,.0f}"
             o.append(f'<text x="{L - 8}" y="{yy + 4:.1f}" text-anchor="end" class="tick">{lab}</text>')
             v += self.step
         every = max(1, round(n / 7))
@@ -332,6 +336,28 @@ CH["mcap"] = Chart(
     rows=mcap, note="NSE totals except 2025, which uses BSE. The Adani sum counts ACC and NDTV alongside the parents that hold them. Derived.")
 
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import paper_parts as PP  # noqa: E402
+
+LEV_X = sorted({k for d in PP.ND.values() for k in d})
+CH["leverage"] = Chart(
+    "c-lev", "Net debt as a multiple of a year's operating earnings (EBITDA)",
+    "Line chart. Net debt to EBITDA for five Adani companies and Reliance Industries, 2015-16 to 2025-26.",
+    LEV_X, [("Adani Green", "ok", PP.ND["Adani Green"]), ("Adani Enterprises", "adani", PP.ND["Adani Enterprises"]),
+            ("Adani Energy Solutions", "muted", PP.ND["Adani Energy Solutions"]), ("Adani Power", "ink", PP.ND["Adani Power"]),
+            ("Adani Ports", "part", PP.ND["Adani Ports"]), ("Reliance", "reliance", PP.ND["Reliance Industries"])],
+    unit="x", ymax=14, step=2,
+    rows=[r for r in PP.FIN if r["metric"].startswith(("Net debt / EBITDA", "Gross borrowings =", "EBITDA, derived", "Net debt (company"))],
+    note="Consolidated figures from annual reports and audited results. Net debt is borrowings less cash, bank balances and current investments. Derived. Below zero means net cash.")
+CH["pledges"] = Chart(
+    "c-pledge", "Founders' shares pledged, as a share of their holding",
+    "Line chart. Share of the promoter holding pledged in four Adani companies, March 2016 to March 2026.",
+    PP.PLEDGE_X, [("Adani Ports", "part", PP.PLEDGE["Adani Ports"]), ("Adani Enterprises", "adani", PP.PLEDGE["Adani Enterprises"]),
+                  ("Adani Energy Solutions", "muted", PP.PLEDGE["Adani Energy Solutions"]), ("Adani Power", "ink", PP.PLEDGE["Adani Power"])],
+    ymax=70, step=10,
+    rows=[r for r in PP.FIN if r["sector"] == "pledges"],
+    note="March 2016 to March 2020 from the annual reports' MGT-9 tables, converted to a share of the promoter holding; from September 2021, NSE shareholding filings. No figure for March 2021.")
+
 # ---------------------------------------------------------------- findings
 
 def entry(port):
@@ -424,6 +450,88 @@ FINDINGS = [
 ]
 
 
+for f in FINDINGS:
+    f.setdefault("part", 1)
+
+WORDS = dict(enumerate("zero one two three four five six seven eight nine ten eleven twelve".split()))
+bid_counts = [PP.nums(r)[0] for r in PP.CPL if r["sector"] == "coal" and "bidders" in r["event"] and "lost" not in r["event"]] + [1]
+thin = sum(1 for n in bid_counts if n <= 2)
+auction_rows = [r for r in PP.CPL if r["sector"] == "coal" and r["date"] >= "2020"]
+lev_last = {k: v[sorted(v)[-1]] for k, v in PP.ND.items()}
+
+FINDINGS += [
+    dict(part=2, slug="coal-auctions", anchor="p2-coal", eyebrow="Coal", chart=None,
+         html=PP.events_table(auction_rows, "Commercial coal auctions won by Adani companies"),
+         title=f"{WORDS[thin].capitalize()} of the {WORDS[len(bid_counts)]} coal auctions Adani won with a published bidder count drew two bidders or fewer",
+         body=[f"Adani companies won {len(PP.coal_auction)} mines in the Ministry of Coal's commercial auctions between 2020 and 2023. The ministry published the number of bidders for {len(bid_counts)} of them: {', '.join(f'{n:.0f}' for n in sorted(bid_counts))}. Gondbahera Ujheni East went to an Adani company on a single bid at the second attempt, with the approval of the Empowered Committee of Secretaries.",
+               "In one auction two Adani companies qualified for the same mine, which another bidder won. The ministry has said that no link between another bidder, Cavill Mining, and Adani has been established."],
+         method="Bidder counts and winning offers from the Ministry of Coal's and the Nominated Authority's auction documents and press releases; ownership of the winning companies from Adani Enterprises' related-party disclosure to the BSE. Two auctions have no published bidder count and are left out of the count."),
+    dict(part=2, slug="hasdeo", anchor="p2-coal", eyebrow="Coal", chart=None,
+         html=PP.events_table([r for r in PP.CPL if r["sector"] == "coal" and r["date"] < "2020"], "Hasdeo Arand: the record"),
+         title="A forest committee rejected the Hasdeo coal clearance in June 2011; the minister overruled it the next day",
+         body=[f"The environment ministry's Forest Advisory Committee recommended on 22 June 2011 that {PP.fac_ha:,.0f} hectares of forest in Hasdeo Arand should not be diverted for the Parsa East and Kanta Basan blocks, which the Rajasthan state generation company holds and an Adani company mines. On 23 June the Minister of State for Environment granted first-stage clearance, giving six reasons.",
+               "In March 2014 the National Green Tribunal sent the clearance back to the committee and suspended work. Permissions for the second phase were granted in 2022 and are under challenge in the Supreme Court and the Chhattisgarh High Court."],
+         method="From the National Green Tribunal's judgment in Appeal 73 of 2012 (24 March 2014), which sets out the committee's recommendation and the minister's order, and the Tribunal's order of 28 May 2025. The reported Supreme Court stay of the Tribunal's suspension and the Chhattisgarh Assembly's 2022 resolution rest on press reports and are labelled as such."),
+    dict(part=2, slug="airports-2018", anchor="p2-airports", eyebrow="Airports", chart=None,
+         html=PP.events_table([r for r in PP.APT if r["sector"] == "airports"], "Airports: the record"),
+         title="Adani won all six airports leased in 2018-19, in a round where the finance ministry and NITI Aayog had questioned the bid documents",
+         body=["The rules for the round, set by an Empowered Group of Secretaries in November 2018, put no cap on how many airports one bidder could win and required no airport experience. Adani Enterprises quoted the highest fee per passenger at all six.",
+               "Notes from the Department of Economic Affairs and NITI Aayog on 10 December 2018 asked for the bid terms to be reviewed and said the PPP guidelines' two-stage process had not been followed. The Kerala High Court held that the committees could overrule such notes and had considered them, and dismissed Kerala's challenge."],
+         method="From the Kerala High Court's judgment of 19 October 2020 in W.P.(C) 2224 of 2019 and connected cases (paras 13, 31, 41-54), the Ministry of Civil Aviation's press note of 21 January 2021, the Cabinet decisions, and Lok Sabha answers of 2019 and 2024. The notes themselves and the per-passenger bids at five of the six airports were not found in any public record."),
+    dict(part=2, slug="solar-award", anchor="p2-solar", eyebrow="Solar power", chart=None,
+         html=PP.events_table([r for r in PP.CPL if r["sector"] == "renewables"], "The manufacturing-linked solar award"),
+         title="One package of the 2019 solar tender drew no bids, and only Adani Green took the 4,000 MW moved from it",
+         body=[f"The Solar Energy Corporation of India's tender of June 2019 linked 8,000 MW of solar power to building solar factories. The Central Electricity Regulatory Commission's order records that {E(PP.seci_bids)}, and that only Adani Green accepted the capacity moved from the package nobody bid for. The final award was {E(PP.seci_final)}.",
+               f"Andhra Pradesh agreed to buy 7,000 MW in 2021 after the tariff was cut to Rs {PP.seci_cut:.2f} a unit. An objector told the Commission the ceiling tariff had been raised to accommodate the manufacturing condition; the Commission declined to examine the bidding structure and adopted the tariffs. This is the transaction behind the 2024 New York indictment, whose allegations are reported in Part 3 as allegations."],
+         method="From CERC Order 286/AT/2021 of 2 April 2022, which records the bids, the transfer of capacity, the tariff revisions and the objections. The Andhra Pradesh cabinet decision is reported in the press and its order number was not found."),
+    dict(part=2, slug="dharavi", anchor="p2-dharavi", eyebrow="Land", chart=None,
+         html=PP.events_table([r for r in PP.CPL if r["sector"] == "land" and ("Dharavi" in r["event"] or "Seclink" in r["event"] or "CoS" in r["event"] or "GR " in r["event"])], "Dharavi: the record"),
+         title=f"Dharavi went to Adani at Rs {PP.inr(PP.dh_new)} crore after a first tender with a higher Rs {PP.inr(PP.dh_old[0])} crore bid was cancelled",
+         body=[f"In the first Dharavi tender, opened in January 2019, Seclink bid Rs {PP.inr(PP.dh_old[0])} crore and Adani Rs {PP.inr(PP.dh_old[1])} crore. Maharashtra cancelled it in 2020, on the ground that railway land had not been part of the bid. In the fresh tender of 2022, {E(PP.dh_bidders)}, and Adani was selected at Rs {PP.inr(PP.dh_new)} crore.",
+               "The Bombay High Court dismissed Seclink's challenge in December 2024. It recorded Adani's argument that the two price bids measured different things, because the bid is money put into the project, not a price paid to the state."],
+         method="All facts from the Bombay High Court's judgment in Writ Petition 4823 of 2022 (20 December 2024). The Supreme Court's notice on Seclink's appeal is reported in the press only."),
+    dict(part=2, slug="transmission-bids", anchor="p2-transmission", eyebrow="Transmission", chart=None,
+         html=PP.events_table([r for r in PP.CPL if r["sector"] == "transmission"], "Transmission: the record"),
+         title="Where transmission auctions were open, Adani won by fractions of a percent",
+         body=[f"For the first phase of the Khavda transmission lines, {E(PP.kh_resp)}; Adani won at Rs {PP.kh:,.2f} million a year against Power Grid's Rs 1,002.84 million. At Karur, Adani won at Rs {PP.kr:,.2f} million a year against Sterlite's Rs 184.01 million.",
+               "Not every award in Part 2 was thin. These two were contested to the last rupee, and the paper reports them for that reason."],
+         method="From the Central Electricity Regulatory Commission's tariff adoption orders for the two projects (May 2022). Only these two orders were read in full; the others would complete the picture."),
+    dict(part=2, slug="jio-licence", anchor="p2-jio", eyebrow="Telecom", chart=None,
+         html=PP.events_table([r for r in PP.REL if r["sector"].startswith("Telecom")], "Jio's licence: the record"),
+         title=f"The federal auditor found that Jio's 2013 move to a voice licence gave it a Rs {PP.inr(PP.jio_adv)} crore advantage",
+         body=[f"Infotel, which became Reliance Jio, won broadband spectrum in all 22 circles in 2010 as an internet licensee. In 2013 it moved to a unified licence permitting voice calls by paying Rs {PP.inr(PP.jio_fee)} crore, the fee set in 2001.",
+               f"The Comptroller and Auditor General's Report No. 20 of 2015 found that the fee's value in 2013 was higher, that the company got an \"undue advantage\" of Rs {PP.inr(PP.jio_adv)} crore, and rejected the telecom department's explanation."],
+         method="From CAG Report No. 20 of 2015, para 2.8, which sets out the auction, the committees' decisions and the computation. The Competition Commission's 2017 order on a predatory-pricing complaint could not be retrieved, and its reported outcome is labelled as such."),
+    dict(part=2, slug="kg-d6", anchor="p2-kgd6", eyebrow="Oil and gas", chart=None,
+         html=PP.events_table([r for r in PP.REL if r["sector"].startswith("Oil")], "KG-D6: the record"),
+         title=f"The auditor could not validate Reliance's KG-D6 costs, and later put excess cost recovery at US$ {PP.kg_excess:,.0f} million",
+         body=[f"The Comptroller and Auditor General's 2011 audit found that the whole KG-D6 block had been treated as a discovery area, so none was relinquished; that estimated development spending rose from US$ {PP.kg_capex[0]:g} billion to US$ {PP.kg_capex[1] + PP.kg_capex[2]:g} billion; and that {E(PP.kg_single)} high-value contracts went on single financial bids. The 2016 follow-up put excess cost recovery at US$ {PP.kg_excess:,.2f} million.",
+               f"The auditor did not find that costs were inflated; it said it could not validate them. Separately, the arbitral award rejecting the government's gas-migration claim was set aside by the Delhi High Court in February 2025, and the petroleum ministry has demanded US$ {PP.kg_demand:g} billion."],
+         method="From CAG Reports No. 19 of 2011-12, No. 24 of 2014 and No. 11 of 2016, and Reliance's stock exchange filings of February and March 2025 on the court outcome and the demand. The Justice A.P. Shah committee report was not retrieved."),
+    dict(part=3, slug="leverage", anchor="p3-leverage", eyebrow="Debt", chart="leverage",
+         title=f"Adani Green's net debt is {lev_last['Adani Green']:.1f} times a year's earnings and Adani Enterprises' {lev_last['Adani Enterprises']:.1f}; Adani Power and Adani Ports are under two",
+         body=[f"Net debt as a multiple of a year's operating earnings differs widely across the Adani companies. In 2025-26 it was {lev_last['Adani Green']:.2f} at Adani Green, {lev_last['Adani Enterprises']:.2f} at Adani Enterprises, {lev_last['Adani Energy Solutions']:.2f} at Adani Energy Solutions, {lev_last['Adani Power']:.2f} at Adani Power and {lev_last['Adani Ports']:.2f} at Adani Ports. Reliance Industries was at {lev_last['Reliance Industries']:.2f}.",
+               "Adani Power's fall from about eight times in 2016-17 is the largest change. The companies that are building fastest carry the most debt."],
+         method="Consolidated borrowings, cash, bank balances and current investments, and earnings before interest, tax, depreciation and amortisation, from annual reports filed with the NSE (to 2021-22) and audited results (from 2022-23). Reliance uses the company's own net debt and EBITDA. A group total is not given because the companies' debts overlap."),
+    dict(part=3, slug="lenders", anchor="p3-lenders", eyebrow="Debt", chart="pledges",
+         title="By its own account, the Adani group replaced Indian bank loans with bonds and foreign banks, and its founders all but stopped borrowing against their shares",
+         body=[f"In the group's investor presentation, Indian public-sector banks provided {PP.mix['PSU banks']['2016']:g}% of long-term debt in March 2016 and {PP.mix['PSU banks']['2024']:g}% in March 2024; private Indian banks went from {PP.mix['Private banks']['2016']:g}% to {PP.mix['Private banks']['2024']:g}%. Bonds, foreign banks and non-bank lenders took their place. This is the group's claim; public-sector bank exposure has never been officially disclosed.",
+               f"Pledged founders' shares tell the same story. In March 2020 the founders had pledged {PP.PLEDGE['Adani Ports']['Mar 2020']:.0f}% of their Adani Ports holding; by March 2025 almost nothing. The group said its founders prepaid US$ {PP.prepay:g} billion of share-backed loans in early 2023."],
+         method="Lender shares are read from a chart in Adani Ports' March 2025 investor presentation and are a company claim. Pledges are from the annual reports' MGT-9 tables (to 2020) and NSE shareholding filings (from September 2021)."),
+    dict(part=3, slug="sebi-order", anchor="p3-legal", eyebrow="Regulation", chart=None,
+         html=PP.events_table([r for r in PP.LEG if r["forum"].startswith("SEBI") or r["forum"].startswith("Supreme Court")], "SEBI and the Supreme Court: the record", text_key="event", extra="holding_or_outcome"),
+         title="SEBI found the offshore-fund allegation \"not established\", and said what its evidence did not cover",
+         body=["SEBI's final order of 28 September 2026 decided the central question raised in January 2023: whether offshore funds holding Adani shares were controlled by the founders' side, which would have breached the rule that a quarter of a listed company's shares be held by the public. It found the allegation not established, because there was no evidence that Vinod Adani directed the funds' investments.",
+               "The order adds that there was no allegation that he financed the investments, and that the result could have been different if there had been. Two individuals linked to the funds were fined Rs 20 lakh each for incorrect or incomplete information. The companies, Gautam Adani and 13 directors settled for Rs 1.48 crore without admission."],
+         method="From SEBI's final order WTM/KV/IVD-3/ID2/32734/2026-27 (paras 167 to 181) and its corrigendum, the Supreme Court's judgment of 3 January 2024 (para 67) and its order of 2 March 2023 (para 10)."),
+    dict(part=3, slug="us-case", anchor="p3-legal", eyebrow="Courts", chart=None,
+         html=PP.events_table([r for r in PP.LEG if r["forum"].startswith("US")], "United States: the record", text_key="event", extra="holding_or_outcome"),
+         title="The US fraud charges against the Adanis were dismissed without a finding on the merits, and the SEC case ended in a settlement without admission",
+         body=["The indictment unsealed in November 2024 charged Gautam Adani, Sagar Adani and Vneet Jaain with securities and wire fraud, and five others with bribery conspiracy. On 10 August 2026 the court dismissed the charges against the three, on the prosecutors' motion, with prejudice, stating that this expressed no opinion about the merits.",
+               "The same day it entered a consent judgment in the SEC's civil case: Gautam Adani pays US$ 6 million and Sagar Adani US$ 12 million, without admitting or denying the allegations. The bribery charges against the five others remain before the court."],
+         method="From the docket of United States v. Adani, 1:24-cr-00433 (E.D.N.Y.), entries 1, 23, 49 and 57, and SEC v. Adani, 1:24-cv-08080, entry 43. The Second Circuit's reported refusal to expedite the prosecutors' petition is from a secondary source."),
+]
+
 # ---------------------------------------------------------------- pages
 
 ICONS = {
@@ -505,38 +613,44 @@ try {{ var t = localStorage.getItem('ind.theme'); if (t === 'dark' || t === 'lig
 
 
 def finding_page(f, i):
-    charts = "".join(CH[c].html() for c in (f.get("chart"), f.get("extra")) if c)
+    charts = "".join(CH[c].html() for c in (f.get("chart"), f.get("extra")) if c) + f.get("html", "")
+    part_name = {1: "Part 1, Concentration", 2: "Part 2, Routes to the state", 3: "Part 3, Finance and risk"}[f["part"]]
+    part_href = {1: f'../../paper/#{f["slug"]}', 2: f'../../paper/part-2/#{f.get("anchor", "")}', 3: f'../../paper/part-3/#{f.get("anchor", "")}'}[f["part"]]
     prev_f = FINDINGS[i - 1] if i > 0 else None
     next_f = FINDINGS[i + 1] if i + 1 < len(FINDINGS) else None
     pager = '<nav class="pager" aria-label="Other findings">' + (
         f'<a href="../{prev_f["slug"]}/"><span class="eyebrow">Previous</span>{E(prev_f["title"])}</a>' if prev_f else "<span></span>") + (
         f'<a href="../{next_f["slug"]}/" class="next"><span class="eyebrow">Next</span>{E(next_f["title"])}</a>' if next_f else "<span></span>") + "</nav>"
     body = f'''<article class="finding">
-<p class="crumbs"><a href="../">Findings</a> · {E(f["eyebrow"])} · Part 1, Concentration</p>
+<p class="crumbs"><a href="../">Findings</a> · {E(f["eyebrow"])} · {part_name}</p>
 <h1>{E(f["title"])}</h1>
 {"".join(f"<p>{p}</p>" for p in f["body"][:1])}
 {charts}
 {"".join(f"<p>{p}</p>" for p in f["body"][1:])}
-<section class="method" aria-labelledby="m-{f["slug"]}"><h2 id="m-{f["slug"]}">How this was measured</h2><p>{f["method"]}</p>
-<p>Every figure above is in <a href="../../data/paper/">the data tables</a> with its source and page. Read the argument in full in <a href="../../paper/#{f["slug"]}">Part 1 of the paper</a>.</p></section>
+<section class="method" aria-labelledby="m-{f["slug"]}"><h2 id="m-{f["slug"]}">{"How this was measured" if f["part"] == 1 or f.get("chart") else "The documents"}</h2><p>{f["method"]}</p>
+<p>Every figure above is in <a href="../../data/paper/">the data tables</a> with its source and page. Read the argument in full in <a href="{part_href}">{part_name.split(",")[0]} of the paper</a>.</p></section>
 {pager}
 </article>'''
     return page("../../", "findings/", f'{f["eyebrow"]}: {f["title"]} | Adani and Ambani', f["title"], body)
 
 
 def findings_index():
-    items = "".join(
-        f'<li><a class="card" href="{f["slug"]}/"><span class="eyebrow">{E(f["eyebrow"])}</span><h2 class="h3">{E(f["title"])}</h2></a></li>'
-        for f in FINDINGS)
+    groups = []
+    for part, name, lede in ((1, "Part 1, Concentration", "How much of each market the two groups hold, on official totals."),
+                             (2, "Part 2, Routes to the state", "How the assets were obtained, and what auditors, regulators and courts recorded."),
+                             (3, "Part 3, Finance and risk", "Debt, lenders, pledged shares, and what the regulators and courts decided.")):
+        items = "".join(
+            f'<li><a class="card" href="{f["slug"]}/"><span class="eyebrow">{E(f["eyebrow"])}</span><h3 class="h3">{E(f["title"])}</h3></a></li>'
+            for f in FINDINGS if f["part"] == part)
+        groups.append(f'<section class="stack" aria-labelledby="fg-{part}"><h2 id="fg-{part}">{E(name)}</h2><p class="note">{E(lede)}</p><ol class="finding-list">{items}</ol></section>')
     body = f'''<section class="stack" style="padding-block:40px 24px;border:0">
-<div class="eyebrow">Findings · Part 1, Concentration</div>
-<h1>What the official figures show</h1>
-<p class="lede">Each page takes one finding from the paper, shows it in a chart, and says how it was measured. Every number comes from a government, regulator or company document, listed under the chart with the page it came from.</p>
+<div class="eyebrow">Findings</div>
+<h1>What the record shows</h1>
+<p class="lede">Each page takes one finding from the paper and shows the chart or the documents behind it. Every number and every event comes from a government, regulator, court or company document, listed with the page it came from.</p>
 </section>
-<ol class="finding-list">{items}</ol>
-<p class="note" style="margin:24px 0 48px">Parts 2 and 3 of the paper, on how the groups obtained their assets and on their finances, are being written and will add findings here.</p>'''
+{"".join(groups)}'''
     return page("../", "findings/", "Findings | Adani and Ambani | ImpactMojo",
-                "Findings from the paper on India's largest business houses, each with its chart, method and sources.", body)
+                "Findings from the paper on India's largest business houses, each with its chart or documents and sources.", body)
 
 
 REFERENCES = [
@@ -556,7 +670,7 @@ def paper_page():
 <div class="eyebrow">Working paper · Part 1 of 3</div>
 <h1>India's largest business houses: how much of the economy do Adani and Ambani hold?</h1>
 <p class="lede">Part 1 measures concentration: the share of each market the two groups hold, sector by sector, on official totals, and their weight in the economy as a whole. Parts 2 and 3 take up how the assets were obtained and how they are financed.</p>
-<p class="byline">ImpactMojo · Draft of {E(last_updated())} · <a href="../data/paper/">Data and sources</a> · <a href="../findings/">Findings</a></p>
+<p class="byline">ImpactMojo · Draft of {E(last_updated())} · <a href="part-2/">Part 2, Routes to the state</a> · <a href="part-3/">Part 3, Finance and risk</a> · <a href="../data/paper/">Data and sources</a> · <a href="../findings/">Findings</a></p>
 </section>
 <nav class="toc" aria-label="Contents"><div class="eyebrow">Contents</div><ol>
 <li><a href="#question">The question and the answer in brief</a></li>
@@ -568,7 +682,7 @@ def paper_page():
 <li><a href="#reading">How to read this</a></li>
 <li><a href="#limits">Limits and next steps</a></li>
 <li><a href="#refs">References</a></li>
-</ol></nav>''')
+</ol><p class="note" style="margin:10px 0 0">Also: <a href="part-2/">Part 2, Routes to the state</a> · <a href="part-3/">Part 3, Finance and risk</a></p></nav>''')
     sec.append(f'''<section id="question" class="paper-sec"><h2>1. The question and the answer in brief</h2>
 <p>Public argument about the Adani and Reliance groups tends to run on two kinds of evidence: lists of what each group owns, and the wealth of the two men who control them. Neither says how much of any market the groups hold. A list of assets cannot tell a 3% share from a 30% one, and a fortune moves with share prices. This paper asks the narrower question that can be answered from public records: in each market where these groups are large, what share do they hold, measured against an official total, and how has it changed?</p>
 <p>The answer differs by group and by market, which is the first thing worth knowing. Adani's position is a set of large but minority shares across infrastructure: {pct(last(P)[1], 0)} of port cargo, {pct(last(A)[1], 0)} of airport passengers, {pct(last(apl_pvt)[1], 0)} of private coal power capacity, {pct(last(agel)[1], 0)} of renewable capacity, {pct(last(aesl)[1], 0)} of the high-voltage grid, about {pct(100 * last(cem)[1] / india_cem_last, 0)} of cement capacity and {pct(last(gas_png)[1], 0)} of household gas connections. In ports, coal power and cement, most of the growth since 2014 came from buying assets other companies had built. Reliance's position is narrower and deeper: {pct(jio_ex, 0)} of mobile subscribers and {pct(jio_agr['2025-26'], 0)} of mobile revenue in a market now held largely by two firms, and {pct(last(ref)[1], 0)} of refining capacity, a share that has been falling.</p>
@@ -646,7 +760,7 @@ def paper_page():
 <li>Company figures count subsidiaries and joint ventures in full.</li>
 <li>Most years for 2024-25 and 2025-26 are provisional and may be revised.</li>
 </ul>
-<p>Corrections are welcome on <a href="https://github.com/Varnasr/industry-conglomerates-database/issues">GitHub</a>.</p></section>''')
+<p>Continue to <a href="part-2/">Part 2, on how the assets were obtained</a>, and <a href="part-3/">Part 3, on finance and the legal record</a>. Corrections are welcome on <a href="https://github.com/Varnasr/industry-conglomerates-database/issues">GitHub</a>.</p></section>''')
     refs = "".join(f'<li id="ref-{k}">{t} <a href="{E(u)}" rel="noopener">{E(u)}</a></li>' for k, t, u in REFERENCES)
     sec.append(f'<section id="refs" class="paper-sec"><h2>References</h2><ol class="refs">{refs}</ol><p class="note">Data sources for each figure are listed under its chart and, row by row, in the <a href="../data/paper/">data tables</a>.</p></section>')
     return page("../", "paper/", "Paper: How Much of the Economy Do Adani and Ambani Hold? | ImpactMojo",
@@ -664,18 +778,23 @@ SHEETS = [
     ("gas_telecom", "Telecom and city gas", "TRAI subscribers, broadband and revenue by operator; spectrum auctions; city gas connections and CNG stations by company."),
     ("cement_retail_media", "Cement, refining, retail and media", "PPAC refining capacity; cement capacity and acquisitions; Reliance Retail; the Reliance-Disney and Adani-NDTV transactions."),
     ("macro_weight", "Economic weight", "Market value, revenue, investment and debt of the listed Adani companies and Reliance Industries; GDP and investment; LIC's disclosed holdings."),
+    ("airports_ports", "Part 2: airports and ports", "The 2019 airport round, the Mumbai airport transfer, and how each port was acquired, with the documents."),
+    ("coal_power_land", "Part 2: coal, power and land", "Coal clearances and auctions, Godda, the solar award, Dharavi, transmission bids and Mundra, as dated events."),
+    ("reliance_state", "Part 2: Reliance and the state", "KG-D6 audits and disputes, Jio's licence, retail and media approvals, and electoral bond purchases."),
+    ("finance", "Part 3: debt and financing", "Borrowings, cash, net debt and earnings by company, lender mix, pledged shares, ratings and the 2023 episode."),
+    ("legal", "Part 3: the legal record", "Dated court and regulatory steps from January 2023 to October 2026, each marked primary or secondary."),
 ]
 
 
 def data_page():
     cards = "".join(
         f'<li class="card"><div class="eyebrow">{len(T[n])} rows</div><h2 class="h3">{E(t)}</h2><p>{E(d)}</p><a class="go" href="{n}.csv" download>Download {n}.csv</a></li>'
-        for n, t, d in SHEETS)
-    total = sum(len(T[n]) for n, _, _ in SHEETS)
+        for n, t, d in SHEETS if n in T)
+    total = sum(len(T[n]) for n, _, _ in SHEETS if n in T)
     body = f'''<section class="stack" style="padding-block:40px 24px;border:0">
 <div class="eyebrow">Data</div>
 <h1>The tables behind the paper</h1>
-<p class="lede">{total:,} rows, each with its value, unit, date, the title of the document it came from, the publisher, the address and the page or table. A row whose note begins "Derived" is a calculation made for this paper from other rows.</p>
+<p class="lede">{total:,} rows, each with the title of the document it came from, the publisher, the address and the page or table. A row whose source begins "Derived" is a calculation made for this paper from other rows. In the Part 2 and Part 3 tables, a row resting on a press report alone says so.</p>
 </section>
 <ul class="cards data-cards">{cards}</ul>
 <section class="stack"><h2>Columns</h2>
@@ -709,6 +828,12 @@ def series_csv():
 def outputs():
     out = {ROOT / "paper" / "index.html": paper_page(),
            ROOT / "findings" / "index.html": findings_index(),
+           ROOT / "paper" / "part-2" / "index.html": page("../../", "paper/", "Paper, Part 2: Routes to the State | Adani and Ambani | ImpactMojo",
+                "Part 2 of a working paper: how the Adani and Reliance groups obtained their assets, and what auditors, regulators and courts recorded.",
+                PP.part2_body(CH, Chart)),
+           ROOT / "paper" / "part-3" / "index.html": page("../../", "paper/", "Paper, Part 3: Finance and Risk | Adani and Ambani | ImpactMojo",
+                "Part 3 of a working paper: debt, lenders, pledged shares, and the regulatory and court record on the Adani and Reliance groups.",
+                PP.part3_body(CH, Chart)),
            ROOT / "data" / "paper" / "index.html": data_page(),
            ROOT / "data" / "paper" / "series.csv": series_csv()}
     for i, f in enumerate(FINDINGS):
