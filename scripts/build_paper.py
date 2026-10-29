@@ -322,7 +322,7 @@ CH["refining"] = Chart(
     f"Line chart. Reliance's share was {pct(ref['2000'])} in 2000, {pct(max(ref.values()))} at its peak, and {pct(last(ref)[1])} in {last(ref)[0]}.",
     list(ref), [("Reliance", "reliance", ref)], ymax=40, step=10,
     rows=pick("cement_retail_media", "Reliance (RIL+RPL SEZ) share of all-India installed refining capacity") + pick("cement_retail_media", "installed refining capacity"),
-    note="Both Jamnagar refineries over all-India capacity, from PPAC. Capacity, not crude processed. Derived.")
+    note="Both Jamnagar refineries over all-India capacity, from PPAC. This is installed capacity; crude actually processed is a separate series. Derived.")
 CH["cement"] = Chart(
     "c-cem", "Cement capacity: the Adani companies and UltraTech, million tonnes a year",
     f"Line chart. Adani's consolidated cement capacity grew from {cem['2023']:g} to {last(cem)[1]:g} million tonnes a year between March 2023 and March 2026.",
@@ -369,23 +369,23 @@ FINDINGS = [
          title=f"Adani's ports handled {pct(last(P)[1], 0)} of India's port cargo in {last(P)[0]}, up from {pct(first(P)[1], 0)} in {first(P)[0]}",
          body=[
              f"The share rose in {rises} of the {len(P) - 1} years. The two steepest years were 2020-21 and 2021-22, when it went from {pct(P['2019-20'])} to {pct(P['2021-22'])}, the years Krishnapatnam, Dighi and Gangavaram joined the group.",
-             "Most of the rise came from buying ports other companies built and ran: Dhamra in June 2014, Kattupalli in June 2018, Krishnapatnam in October 2020, Dighi in February 2021, Gangavaram in stages to April 2021, Karaikal in April 2023 and Gopalpur in October 2024. Mundra, the group's first port, remains its largest.",
+             "Most of the rise came from buying ports other companies built and ran, starting with Dhamra in June 2014, Kattupalli in June 2018, Krishnapatnam in October 2020, Dighi in February 2021, Gangavaram in stages to April 2021, Karaikal in April 2023 and Gopalpur in October 2024. Mundra, the group's first port, remains its largest.",
              "The company's own share claims match this calculation for the last three years. For 2020-21 the company says 25%; on the same official denominator its own cargo figure gives " + pct(P['2020-21']) + ".",
          ],
-         method="The numerator is cargo at Adani Ports' Indian ports from its annual reports; from 2022-23 the company's headline figure also includes ports abroad, which are left out. The denominator is all cargo at major and non-major ports from the Ministry of Ports, Shipping and Waterways. Company and ministry figures for the same port differ a little (Mundra in 2023-24: 179.6 million tonnes in the company's report, 172.5 in the ministry's), so each side of the ratio comes from one source throughout. As a check from official figures alone, the non-major ports Adani ran in 2023-24 handled about 23% of the national total in the ministry's port-wise table; that leaves out Adani's terminals inside major ports, so it is a lower bound."),
+         method="The numerator is cargo at Adani Ports' Indian ports from its annual reports; from 2022-23 the company's headline figure also includes ports abroad, which are left out. The denominator is all cargo at major and non-major ports from the Ministry of Ports, Shipping and Waterways. Company and ministry figures for the same port differ a little (Mundra in 2023-24 handled 179.6 million tonnes in the company's report, 172.5 in the ministry's), so each side of the ratio comes from one source throughout. As a check from official figures alone, the non-major ports Adani ran in 2023-24 handled about 23% of the national total in the ministry's port-wise table; that leaves out Adani's terminals inside major ports, so it is a lower bound."),
     dict(slug="airports", chart="airports", eyebrow="Airports",
          title=f"The airports Adani runs carry {pct(last(A)[1], 0)} of India's air passengers, fewer than the {pct(first(A)[1], 0)} the same airports carried in {first(A)[0]}",
          body=[
              f"Adani took over Ahmedabad, Lucknow and Mangaluru from October 2020, Mumbai on 13 July 2021, and Jaipur, Guwahati and Thiruvananthapuram later in 2021. Navi Mumbai opened in 2025-26. Since 2022-23, the first full year with all seven, the share has stayed between {pct(min(v for k, v in A.items() if k >= '2022-23'))} and {pct(max(v for k, v in A.items() if k >= '2022-23'))}.",
-             f"The share fell from {pct(A['2013-14'])} to {pct(A['2019-20'])} before Adani ran any of them, because traffic grew faster at other airports. What changed after 2020 is who runs them: one company now operates airports handling close to a quarter of passenger movements, Mumbai's among them.",
+             f"The share fell from {pct(A['2013-14'])} to {pct(A['2019-20'])} before Adani ran any of them, because traffic grew faster at other airports. What changed after 2020 is who runs them. One company now operates airports handling close to a quarter of passenger movements, Mumbai's among them.",
              f"Six of these airports came from one privatisation round in 2019. The Ministry of Civil Aviation records {bids} bids from {bidders} bidders, with the per-passenger fee as the bid, and Adani the highest bidder at all six. A group of secretaries decided on 17 November 2018 to set no cap on the number of airports one bidder could win, citing the six airports' {pct(six_share)} share of traffic. How the round was decided is the subject of Part 2.",
          ],
-         method="Shares are of passenger movements at each airport in the Airports Authority of India's annual traffic tables, domestic and international together. AAI counts a passenger at both the airport they leave and the airport they reach, so the share is of airport throughput and does not count travellers. The same set of airports is used in every year so that the line shows the airports, not the change of owner. 2024-25 and 2025-26 are provisional."),
+         method="Shares are of passenger movements at each airport in the Airports Authority of India's annual traffic tables, domestic and international together. AAI counts a passenger at both the airport they leave and the airport they reach, so the share is of airport throughput and does not count travellers. The same set of airports is used in every year so that the line follows the same airports through the change of owner. 2024-25 and 2025-26 are provisional."),
     dict(slug="coal-power", chart="coal", extra="coal_mw", eyebrow="Coal power",
          title=f"Adani Power runs {pct(last(apl_pvt)[1], 0)} of India's private coal power capacity, mostly bought in a market that stopped growing",
          body=[
-             f"Private coal and lignite capacity grew fast to 2017-18 and then stopped: it was {pvt_mw['2017-18']:,.0f} MW in 2017-18 and {last(pvt_mw)[1]:,.0f} MW in {last(pvt_mw)[0]}. Over the same years Adani Power went from {apl_mw['2017-18']:,.0f} MW to {last(apl_mw)[1]:,.0f} MW.",
-             f"The share therefore traced a U. It was {pct(apl_pvt['2013-14'])} in 2013-14, fell to {pct(min(apl_pvt.values()))} by 2018-19 while others built, and rose to {pct(last(apl_pvt)[1])} as Adani bought plants: Udupi in April 2015, Raipur and Raigarh in 2019-20, and Mahan in March 2022. Godda, 1,600 MW in Jharkhand, was built by the group and sells its power to Bangladesh.",
+             f"Private coal and lignite capacity grew fast to 2017-18 and then stopped. It was {pvt_mw['2017-18']:,.0f} MW in 2017-18 and {last(pvt_mw)[1]:,.0f} MW in {last(pvt_mw)[0]}. Over the same years Adani Power went from {apl_mw['2017-18']:,.0f} MW to {last(apl_mw)[1]:,.0f} MW.",
+             f"The share therefore traced a U. It was {pct(apl_pvt['2013-14'])} in 2013-14, fell to {pct(min(apl_pvt.values()))} by 2018-19 while others built, and rose to {pct(last(apl_pvt)[1])} as Adani bought plants at Udupi in April 2015, Raipur and Raigarh in 2019-20, and Mahan in March 2022. Godda, 1,600 MW in Jharkhand, was built by the group and sells its power to Bangladesh.",
              f"Of all coal and lignite capacity, public and private, Adani Power's share is {pct(last(apl_all)[1])}.",
          ],
          method="Adani Power's capacity is its gross consolidated thermal capacity at 31 March from its annual reports, which counts subsidiaries in full. The denominators are the Central Electricity Authority's installed capacity reports for utilities at 31 March, which leave out captive plants. Adani Power's own share claims change basis between years (its 2024-25 figure leaves Godda out, its 2025-26 figure puts it in); this calculation includes Godda throughout from 2023-24. Whether the CEA counts Godda in Jharkhand's private capacity was not confirmed."),
@@ -402,7 +402,7 @@ FINDINGS = [
              f"The Central Electricity Authority's list of inter-state transmission projects awarded through tariff-based competitive bidding names Adani as the executing company on {int(tbcb_ad)} of {int(tbcb_all)} projects commissioned or under construction, {pct(100 * tbcb_ad / tbcb_all)} by count.",
              f"Adani Energy Solutions' operational network was {pct(first(aesl)[1])} of India's lines at 220 kV and above in {first(aesl)[0]} and {pct(last(aesl)[1])} in {last(aesl)[0]}. In the CEA's count, lines built by private companies and joint ventures of every owner were {pct(100 * jv_ckm / last(ckm)[1])} of the network in {last(ckm)[0]}; the rest belongs to central and state government utilities.",
          ],
-         method="Project counts are from the CEA's September 2026 status report on competitively bid projects; they are counts, not kilometres or cost, and name the current executing company, so a project Adani bought counts as Adani's. One project lists its company only as 'Reliance', which the report does not identify, and is not attributed to Reliance Industries. Network shares are Adani's operational circuit kilometres over the CEA's all-India total at 220 kV and above; Adani's network includes some lower-voltage lines, so the share is an upper bound."),
+         method="Project counts are from the CEA's September 2026 status report on competitively bid projects; they count projects and say nothing of kilometres or cost, and name the current executing company, so a project Adani bought counts as Adani's. One project lists its company only as 'Reliance', which the report does not identify, and is not attributed to Reliance Industries. Network shares are Adani's operational circuit kilometres over the CEA's all-India total at 220 kV and above; Adani's network includes some lower-voltage lines, so the share is an upper bound."),
     dict(slug="mobile", chart="telecom", extra="hhi", eyebrow="Telecom",
          title=f"Jio holds {pct(jio_ex, 0)} of India's mobile subscribers ten years after it launched, and the market is now highly concentrated",
          body=[
@@ -415,21 +415,21 @@ FINDINGS = [
          title=f"Jio earns {pct(jio_agr['2025-26'], 0)} of India's mobile and access-service revenue, and Jio and Airtel together {pct(jio_agr['2025-26'] + airtel_agr['2025-26'], 0)}",
          body=[
              f"Revenue tells the same story as subscribers with less noise, because an inactive SIM earns nothing. Jio's share went from {pct(jio_agr['2017-18'])} in 2017-18 to {pct(jio_agr['2018-19'])} a year later, and has stayed between {pct(min(v for k, v in jio_agr.items() if k >= '2019-20'))} and {pct(max(v for k, v in jio_agr.items() if k >= '2019-20'))} since. Airtel's has risen every year since 2018-19.",
-             "Jio paid for the spectrum it uses in the government's auctions: " + "; ".join(f"Rs {inr(num(r))} crore in the {r['year']}" for r in spectrum) + ".",
+             "Jio paid for the spectrum it uses in the government's auctions, paying " + "; ".join(f"Rs {inr(num(r))} crore in the {r['year']}" for r in spectrum) + ".",
          ],
          method="Adjusted gross revenue for access services, from TRAI's quarterly and annual performance reports, each operator over the total. 2016-17 to 2021-22 sum four quarters; later years use TRAI's annual figures. 2016-17 is left out of the chart because one-off receipts from spectrum surrendered by Videocon and Aircel inflate it."),
     dict(slug="refining", chart="refining", eyebrow="Refining",
          title=f"Reliance's share of India's refining capacity has fallen from {pct(max(ref.values()), 0)} in 2009 to {pct(last(ref)[1], 0)}",
          body=[
              f"Reliance's two Jamnagar refineries hold {pct(last(ref)[1])} of India's refining capacity on 1 April {last(ref)[0]}. The share jumped in 2009 when the second refinery opened and has drifted down since as public sector refiners added capacity; Reliance's own capacity has not changed since 2018.",
-             "This is the one market in Part 1 where a Reliance share is falling. It also overstates Reliance's place in India's fuel market: the second refinery sits in a special economic zone and mainly exports.",
+             "This is the one market in Part 1 where a Reliance share is falling. It also overstates Reliance's place in India's fuel market, because the second refinery sits in a special economic zone and mainly exports.",
          ],
          method="Installed capacity at 1 April from the Petroleum Planning and Analysis Cell, both Jamnagar refineries over all India. Nayara Energy's Vadinar refinery, nearby, is not Reliance's. Capacity is not crude processed; PPAC's throughput tables could not be read for this paper."),
     dict(slug="cement", chart="cement", eyebrow="Cement",
          title=f"The Adani group built India's second largest cement business in four years, almost entirely by acquisition",
          body=[
              f"The Adani family took control of Ambuja Cements and, through it, ACC from Holcim in September 2022. The group then bought Sanghi Industries (December 2023), Penna Cement (August 2024) and Orient Cement (April 2025). Consolidated capacity went from {cem['2023']:g} million tonnes a year in March 2023 to {last(cem)[1]:g} in March 2026.",
-             f"UltraTech, the largest, had {last(ut)[1]:g}. Against the Economic Survey's figure of about {india_cem_last:g} million tonnes for all of India, the two together hold roughly {pct(100 * (last(ut)[1] + last(cem)[1]) / india_cem_last, 0)} of capacity and Adani about {pct(100 * last(cem)[1] / india_cem_last, 0)}. Those two shares are indicative only: the national figure has no stated date and UltraTech's includes plants abroad.",
+             f"UltraTech, the largest, had {last(ut)[1]:g}. Against the Economic Survey's figure of about {india_cem_last:g} million tonnes for all of India, the two together hold roughly {pct(100 * (last(ut)[1] + last(cem)[1]) / india_cem_last, 0)} of capacity and Adani about {pct(100 * last(cem)[1] / india_cem_last, 0)}. Those two shares are indicative only, because the national figure has no stated date and UltraTech's includes plants abroad.",
              "Cement is sold regionally, so national capacity shares say little about market power in any one region. The Competition Commission's orders on each acquisition would give regional shares; they could not be retrieved for this paper.",
          ],
          method="Consolidated capacity at 31 March from Ambuja Cements' and UltraTech's annual reports. Consolidation counts each subsidiary in full whatever the stake (Ambuja held 50.05% of ACC at acquisition, and about 73% of Orient by March 2026), so ownership-weighted capacity would be lower. Targets of 119 and 140 million tonnes in company material are plans and are not used."),
@@ -437,16 +437,16 @@ FINDINGS = [
          title=f"Adani Total Gas supplies {pct(last(gas_png)[1], 0)} of India's piped household gas connections and runs {pct(last(gas_cng)[1], 0)} of its CNG stations",
          body=[
              f"Adani Total Gas holds licences for {E(ga[next(k for k in ga if 'Adani Total' in k)]['value'])} of the geographical areas the Petroleum and Natural Gas Regulatory Board has authorised, and its 50:50 joint venture with Indian Oil holds {E(ga[next(k for k in ga if 'Indian Oil' in k)]['value'])} more. The joint venture adds {pct(last(jv_png)[1])} of household connections and {pct(last(jv_cng)[1])} of CNG stations; it is kept separate here because Indian Oil owns half of it.",
-             f"These shares have barely moved since 2020-21: household connections between {pct(min(gas_png.values()))} and {pct(max(gas_png.values()))}, CNG stations between {pct(min(gas_cng.values()))} and {pct(max(gas_cng.values()))}. City gas is a sizeable business for the group without being a dominant one.",
+             f"These shares have barely moved since 2020-21, with household connections between {pct(min(gas_png.values()))} and {pct(max(gas_png.values()))}, CNG stations between {pct(min(gas_cng.values()))} and {pct(max(gas_cng.values()))}. City gas is a sizeable business for the group without being a dominant one.",
          ],
          method="Area-by-area tables of the gas regulator, as reprinted in the Petroleum Planning and Analysis Cell's Ready Reckoner, summed by company over the printed national totals. The regulator's own site could not be reached, and no table was found for March 2016 to 2019, 2024 or 2025. The April 2026 table's rows add to about 2% more than its printed total, so the 2026 shares are indicative."),
     dict(slug="market-value", chart="mcap", eyebrow="Economic weight",
          title=f"The listed Adani companies went from {pct(mc_ad['2020'], 0)} to {pct(mc_ad['2022'], 0)} of India's stock market value in two years, and fell back after January 2023",
          body=[
              f"In March 2020 the listed Adani companies were worth {pct(mc_ad['2020'])} of all companies on the NSE; in March 2022, {pct(mc_ad['2022'])}. After the Hindenburg Research report of 24 January 2023 the share fell to {pct(mc_ad['2023'])} by March 2023, and was {pct(mc_ad['2025'])} in March 2025.",
-             f"Reliance Industries alone was worth between {pct(min(mc_ril.values()))} and {pct(max(mc_ril.values()))} of the market across these years. By the size of its balance sheet it is much the larger group: a 2025 working paper by Dasgupta and Jayadev, using CMIE Prowess, puts Reliance at 11.3% of the assets of India's non-financial companies in 2023-24 and Adani at 2.5%, fourth among the five largest groups behind Tata and Aditya Birla.",
+             f"Reliance Industries alone was worth between {pct(min(mc_ril.values()))} and {pct(max(mc_ril.values()))} of the market across these years. By the size of its balance sheet it is much the larger group. A 2025 working paper by Dasgupta and Jayadev, using CMIE Prowess, puts Reliance at 11.3% of the assets of India's non-financial companies in 2023-24 and Adani at 2.5%, fourth among the five largest groups behind Tata and Aditya Birla.",
          ],
-         method="Market capitalisation at the end of March from the exchanges' lists, over the exchange total in the RBI's Handbook of Statistics; 2025 uses BSE figures. The Adani sum includes ACC and NDTV as well as the companies that own them, so it counts those holdings twice; the double counting is small. Market value moves with share prices and is a measure of investors' expectations, not of a group's place in its markets."),
+         method="Market capitalisation at the end of March from the exchanges' lists, over the exchange total in the RBI's Handbook of Statistics; 2025 uses BSE figures. The Adani sum includes ACC and NDTV as well as the companies that own them, so it counts those holdings twice; the double counting is small. Market value moves with share prices and measures what investors expect. A group's place in its markets is measured in the sector charts above."),
 ]
 
 
@@ -463,7 +463,7 @@ FINDINGS += [
     dict(part=2, slug="coal-auctions", anchor="p2-coal", eyebrow="Coal", chart=None,
          html=PP.events_table(auction_rows, "Commercial coal auctions won by Adani companies"),
          title=f"{WORDS[thin].capitalize()} of the {WORDS[len(bid_counts)]} coal auctions Adani won with a published bidder count drew two bidders or fewer",
-         body=[f"Adani companies won {len(PP.coal_auction)} mines in the Ministry of Coal's commercial auctions between 2020 and 2023. The ministry published the number of bidders for {len(bid_counts)} of them: {', '.join(f'{n:.0f}' for n in sorted(bid_counts))}. Gondbahera Ujheni East went to an Adani company on a single bid at the second attempt, with the approval of the Empowered Committee of Secretaries.",
+         body=[f"Adani companies won {len(PP.coal_auction)} mines in the Ministry of Coal's commercial auctions between 2020 and 2023. The ministry published the number of bidders for {len(bid_counts)} of them, and the counts were {', '.join(f'{n:.0f}' for n in sorted(bid_counts))}. Gondbahera Ujheni East went to an Adani company on a single bid at the second attempt, with the approval of the Empowered Committee of Secretaries.",
                "In one auction two Adani companies qualified for the same mine, which another bidder won. The ministry has said that no link between another bidder, Cavill Mining, and Adani has been established."],
          method="Bidder counts and winning offers from the Ministry of Coal's and the Nominated Authority's auction documents and press releases; ownership of the winning companies from Adani Enterprises' related-party disclosure to the BSE. Two auctions have no published bidder count and are left out of the count."),
     dict(part=2, slug="hasdeo", anchor="p2-coal", eyebrow="Coal", chart=None,
@@ -488,10 +488,10 @@ FINDINGS += [
          html=PP.events_table([r for r in PP.CPL if r["sector"] == "land" and ("Dharavi" in r["event"] or "Seclink" in r["event"] or "CoS" in r["event"] or "GR " in r["event"])], "Dharavi: the record"),
          title=f"Dharavi went to Adani at Rs {PP.inr(PP.dh_new)} crore after a first tender with a higher Rs {PP.inr(PP.dh_old[0])} crore bid was cancelled",
          body=[f"In the first Dharavi tender, opened in January 2019, Seclink bid Rs {PP.inr(PP.dh_old[0])} crore and Adani Rs {PP.inr(PP.dh_old[1])} crore. Maharashtra cancelled it in 2020, on the ground that railway land had not been part of the bid. In the fresh tender of 2022, {E(PP.dh_bidders)}, and Adani was selected at Rs {PP.inr(PP.dh_new)} crore.",
-               "The Bombay High Court dismissed Seclink's challenge in December 2024. It recorded Adani's argument that the two price bids measured different things, because the bid is money put into the project, not a price paid to the state."],
+               "The Bombay High Court dismissed Seclink's challenge in December 2024. It recorded Adani's argument that the two price bids measured different things, because the bid is the money a bidder commits to the project company."],
          method="All facts from the Bombay High Court's judgment in Writ Petition 4823 of 2022 (20 December 2024). The Supreme Court's notice on Seclink's appeal is reported in the press only."),
     dict(part=2, slug="transmission-bids", anchor="p2-transmission", eyebrow="Transmission", chart=None,
-         html=PP.events_table([r for r in PP.CPL if r["sector"] == "transmission"], "Transmission: the record"),
+         html=PP.events_table([r for r in PP.CPL if r["sector"] == "transmission"], "Transmission awards on the record"),
          title="Where transmission auctions were open, Adani won by fractions of a percent",
          body=[f"For the first phase of the Khavda transmission lines, {E(PP.kh_resp)}; Adani won at Rs {PP.kh:,.2f} million a year against Power Grid's Rs 1,002.84 million. At Karur, Adani won at Rs {PP.kr:,.2f} million a year against Sterlite's Rs 184.01 million.",
                "Not every award in Part 2 was thin. These two were contested to the last rupee, and the paper reports them for that reason."],
@@ -521,14 +521,14 @@ FINDINGS += [
     dict(part=3, slug="sebi-order", anchor="p3-legal", eyebrow="Regulation", chart=None,
          html=PP.events_table([r for r in PP.LEG if r["forum"].startswith("SEBI") or r["forum"].startswith("Supreme Court")], "SEBI and the Supreme Court: the record", text_key="event", extra="holding_or_outcome"),
          title="SEBI found the offshore-fund allegation \"not established\", and said what its evidence did not cover",
-         body=["SEBI's final order of 28 September 2026 decided the central question raised in January 2023: whether offshore funds holding Adani shares were controlled by the founders' side, which would have breached the rule that a quarter of a listed company's shares be held by the public. It found the allegation not established, because there was no evidence that Vinod Adani directed the funds' investments.",
+         body=["SEBI's final order of 28 September 2026 decided the central question raised in January 2023, which was whether offshore funds holding Adani shares were controlled by the founders' side, which would have breached the rule that a quarter of a listed company's shares be held by the public. It found the allegation not established, because there was no evidence that Vinod Adani directed the funds' investments.",
                "The order adds that there was no allegation that he financed the investments, and that the result could have been different if there had been. Two individuals linked to the funds were fined Rs 20 lakh each for incorrect or incomplete information. The companies, Gautam Adani and 13 directors settled for Rs 1.48 crore without admission."],
          method="From SEBI's final order WTM/KV/IVD-3/ID2/32734/2026-27 (paras 167 to 181) and its corrigendum, the Supreme Court's judgment of 3 January 2024 (para 67) and its order of 2 March 2023 (para 10)."),
     dict(part=3, slug="us-case", anchor="p3-legal", eyebrow="Courts", chart=None,
          html=PP.events_table([r for r in PP.LEG if r["forum"].startswith("US")], "United States: the record", text_key="event", extra="holding_or_outcome"),
          title="The US fraud charges against the Adanis were dismissed without a finding on the merits, and the SEC case ended in a settlement without admission",
          body=["The indictment unsealed in November 2024 charged Gautam Adani, Sagar Adani and Vneet Jaain with securities and wire fraud, and five others with bribery conspiracy. On 10 August 2026 the court dismissed the charges against the three, on the prosecutors' motion, with prejudice, stating that this expressed no opinion about the merits.",
-               "The same day it entered a consent judgment in the SEC's civil case: Gautam Adani pays US$ 6 million and Sagar Adani US$ 12 million, without admitting or denying the allegations. The bribery charges against the five others remain before the court."],
+               "The same day it entered a consent judgment in the SEC's civil case, under which Gautam Adani pays US$ 6 million and Sagar Adani US$ 12 million, without admitting or denying the allegations. The bribery charges against the five others remain before the court."],
          method="From the docket of United States v. Adani, 1:24-cr-00433 (E.D.N.Y.), entries 1, 23, 49 and 57, and SEC v. Adani, 1:24-cv-08080, entry 43. The Second Circuit's reported refusal to expedite the prosecutors' petition is from a secondary source."),
 ]
 
@@ -614,7 +614,7 @@ try {{ var t = localStorage.getItem('ind.theme'); if (t === 'dark' || t === 'lig
 
 def finding_page(f, i):
     charts = "".join(CH[c].html() for c in (f.get("chart"), f.get("extra")) if c) + f.get("html", "")
-    part_name = {1: "Part 1, Concentration", 2: "Part 2, Routes to the state", 3: "Part 3, Finance and risk"}[f["part"]]
+    part_name = {1: "Part 1, Concentration", 2: "Part 2, How the assets were obtained", 3: "Part 3, Finance and risk"}[f["part"]]
     part_href = {1: f'../../paper/#{f["slug"]}', 2: f'../../paper/part-2/#{f.get("anchor", "")}', 3: f'../../paper/part-3/#{f.get("anchor", "")}'}[f["part"]]
     prev_f = FINDINGS[i - 1] if i > 0 else None
     next_f = FINDINGS[i + 1] if i + 1 < len(FINDINGS) else None
@@ -631,13 +631,13 @@ def finding_page(f, i):
 <p>Every figure above is in <a href="../../data/paper/">the data tables</a> with its source and page. Read the argument in full in <a href="{part_href}">{part_name.split(",")[0]} of the paper</a>.</p></section>
 {pager}
 </article>'''
-    return page("../../", "findings/", f'{f["eyebrow"]}: {f["title"]} | Adani and Ambani', f["title"], body)
+    return page("../../", "findings/", f'{f["title"]} | {f["eyebrow"]} | Adani and Ambani', f["title"], body)
 
 
 def findings_index():
     groups = []
     for part, name, lede in ((1, "Part 1, Concentration", "How much of each market the two groups hold, on official totals."),
-                             (2, "Part 2, Routes to the state", "How the assets were obtained, and what auditors, regulators and courts recorded."),
+                             (2, "Part 2, How the assets were obtained", "How the assets were obtained, and what auditors, regulators and courts recorded."),
                              (3, "Part 3, Finance and risk", "Debt, lenders, pledged shares, and what the regulators and courts decided.")):
         items = "".join(
             f'<li><a class="card" href="{f["slug"]}/"><span class="eyebrow">{E(f["eyebrow"])}</span><h3 class="h3">{E(f["title"])}</h3></a></li>'
@@ -668,9 +668,9 @@ def paper_page():
     sec = []
     sec.append(f'''<section class="stack" style="padding-block:40px 24px;border:0">
 <div class="eyebrow">Working paper · Part 1 of 3</div>
-<h1>India's largest business houses: how much of the economy do Adani and Ambani hold?</h1>
-<p class="lede">Part 1 measures concentration: the share of each market the two groups hold, sector by sector, on official totals, and their weight in the economy as a whole. Parts 2 and 3 take up how the assets were obtained and how they are financed.</p>
-<p class="byline">ImpactMojo · Draft of {E(last_updated())} · <a href="part-2/">Part 2, Routes to the state</a> · <a href="part-3/">Part 3, Finance and risk</a> · <a href="../data/paper/">Data and sources</a> · <a href="../findings/">Findings</a></p>
+<h1>How much of India's economy do Adani and Ambani hold?</h1>
+<p class="lede">Part 1 measures concentration, meaning the share of each market the two groups hold, sector by sector, on official totals, and their weight in the economy as a whole. Parts 2 and 3 take up how the assets were obtained and how they are financed.</p>
+<p class="byline">ImpactMojo · Draft of {E(last_updated())} · <a href="part-2/">Part 2, How the assets were obtained</a> · <a href="part-3/">Part 3, Finance and risk</a> · <a href="../data/paper/">Data and sources</a> · <a href="../findings/">Findings</a></p>
 </section>
 <nav class="toc" aria-label="Contents"><div class="eyebrow">Contents</div><ol>
 <li><a href="#question">The question and the answer in brief</a></li>
@@ -682,13 +682,13 @@ def paper_page():
 <li><a href="#reading">How to read this</a></li>
 <li><a href="#limits">Limits and next steps</a></li>
 <li><a href="#refs">References</a></li>
-</ol><p class="note" style="margin:10px 0 0">Also: <a href="part-2/">Part 2, Routes to the state</a> · <a href="part-3/">Part 3, Finance and risk</a></p></nav>''')
+</ol><p class="note" style="margin:10px 0 0">Also read <a href="part-2/">Part 2, How the assets were obtained</a> · <a href="part-3/">Part 3, Finance and risk</a></p></nav>''')
     sec.append(f'''<section id="question" class="paper-sec"><h2>1. The question and the answer in brief</h2>
-<p>Public argument about the Adani and Reliance groups tends to run on two kinds of evidence: lists of what each group owns, and the wealth of the two men who control them. Neither says how much of any market the groups hold. A list of assets cannot tell a 3% share from a 30% one, and a fortune moves with share prices. This paper asks the narrower question that can be answered from public records: in each market where these groups are large, what share do they hold, measured against an official total, and how has it changed?</p>
-<p>The answer differs by group and by market, which is the first thing worth knowing. Adani's position is a set of large but minority shares across infrastructure: {pct(last(P)[1], 0)} of port cargo, {pct(last(A)[1], 0)} of airport passengers, {pct(last(apl_pvt)[1], 0)} of private coal power capacity, {pct(last(agel)[1], 0)} of renewable capacity, {pct(last(aesl)[1], 0)} of the high-voltage grid, about {pct(100 * last(cem)[1] / india_cem_last, 0)} of cement capacity and {pct(last(gas_png)[1], 0)} of household gas connections. In ports, coal power and cement, most of the growth since 2014 came from buying assets other companies had built. Reliance's position is narrower and deeper: {pct(jio_ex, 0)} of mobile subscribers and {pct(jio_agr['2025-26'], 0)} of mobile revenue in a market now held largely by two firms, and {pct(last(ref)[1], 0)} of refining capacity, a share that has been falling.</p>
-<p>No market in Part 1 is a monopoly, and the strongest form of the public claim, that two groups control the economy, is not supported by these figures. A weaker claim is supported: in ports, private coal power and mobile telecom, one of these groups now holds a quarter or more of the market, and in each the share has risen sharply within a decade.</p></section>''')
+<p>Public argument about the Adani and Reliance groups tends to run on two kinds of evidence, lists of what each group owns, and the wealth of the two men who control them. Neither says how much of any market the groups hold. A list of assets cannot tell a 3% share from a 30% one, and a fortune moves with share prices. This paper asks the narrower question that can be answered from public records. In each market where these groups are large, what share do they hold, measured against an official total, and how has it changed?</p>
+<p>The answer differs by group and by market, which is the first thing worth knowing. Adani's position is a set of large but minority shares across infrastructure, with {pct(last(P)[1], 0)} of port cargo, {pct(last(A)[1], 0)} of airport passengers, {pct(last(apl_pvt)[1], 0)} of private coal power capacity, {pct(last(agel)[1], 0)} of renewable capacity, {pct(last(aesl)[1], 0)} of the high-voltage grid, about {pct(100 * last(cem)[1] / india_cem_last, 0)} of cement capacity and {pct(last(gas_png)[1], 0)} of household gas connections. In ports, coal power and cement, most of the growth since 2014 came from buying assets other companies had built. Reliance's position is narrower and deeper, with {pct(jio_ex, 0)} of mobile subscribers and {pct(jio_agr['2025-26'], 0)} of mobile revenue in a market now held largely by two firms, and {pct(last(ref)[1], 0)} of refining capacity, a share that has been falling.</p>
+<p>No market in Part 1 is a monopoly, and the strongest form of the public claim, that two groups control the economy, is not supported by these figures. A weaker claim is supported. In ports, private coal power and mobile telecom, one of these groups now holds a quarter or more of the market, and in each the share has risen sharply within a decade.</p></section>''')
     sec.append('''<section id="method" class="paper-sec"><h2>2. What is measured, and how</h2>
-<p>Every share in this paper is a numerator from the group's own filings, or from a regulator's table that names the company, over a denominator from a government source: the Ministry of Ports for cargo, the Airports Authority for passengers, the Central Electricity Authority for power and transmission, TRAI for telecom, the Petroleum Planning and Analysis Cell for refining and city gas, and the Economic Survey for cement. Where a company publishes its own market share, it is compared with the calculation and the difference is reported.</p>
+<p>Every share in this paper is a numerator from the group's own filings, or from a regulator's table that names the company, over a denominator from a government source, which is the Ministry of Ports for cargo, the Airports Authority for passengers, the Central Electricity Authority for power and transmission, TRAI for telecom, the Petroleum Planning and Analysis Cell for refining and city gas, and the Economic Survey for cement. Where a company publishes its own market share, it is compared with the calculation and the difference is reported.</p>
 <p>Four choices run through the paper and each moves the numbers.</p>
 <ul>
 <li><strong>Capacity or output.</strong> Power, refining and cement are measured by installed capacity, because that is what the government publishes by company. Capacity is not production, and it is not sales, which is what a competition authority usually measures.</li>
@@ -710,7 +710,7 @@ def paper_page():
 <p>{FINDINGS[2]["body"][0]} {FINDINGS[2]["body"][1]}</p>
 {CH["coal"].html()}
 {CH["coal_mw"].html()}
-<p>{FINDINGS[2]["body"][2]} The group also mines coal: its companies won {", ".join(E(r["value"]) for r in coal_won if "adani" in r["entity"].lower())} of the {E(coal_total["value"])} blocks sold in the Ministry of Coal's commercial auctions to July 2023, and it runs further mines under contract for state and central utilities, which own them.</p>
+<p>{FINDINGS[2]["body"][2]} The group also mines coal. Its companies won {", ".join(E(r["value"]) for r in coal_won if "adani" in r["entity"].lower())} of the {E(coal_total["value"])} blocks sold in the Ministry of Coal's commercial auctions to July 2023, and it runs further mines under contract for state and central utilities, which own them.</p>
 <h3 id="renewables">3.4 Renewable power</h3>
 <p>{FINDINGS[3]["body"][0]}</p>
 {CH["green"].html()}
@@ -747,11 +747,11 @@ def paper_page():
 <p>The two measures answer different questions. Market value is what investors expect the companies to earn; it rose fastest for Adani and fell fastest after January 2023. Assets measure what the companies hold now, and on that measure Reliance is several times the size of the Adani group.</p></section>''')
     sec.append('''<section id="literature" class="paper-sec"><h2>6. What others have found</h2>
 <p>The best-known estimate is <a href="#ref-acharya">Acharya (2023)</a>. Using CMIE Prowess, he finds that the five largest groups (Reliance, Tata, Aditya Birla, Adani and Bharti) held about 10% of non-financial corporate assets in 1991 and nearly 18% in 2021, that they first spread across sectors and then, from 2015, deepened their shares within them, and that their markups rose relative to other firms. He describes the link to inflation as potentially causal and calls for further inquiry. His sector figures for telecom, retail and petroleum are shares of the top five firms in each sector, and are often quoted as if they were Reliance's alone; they are not.</p>
-<p><a href="#ref-commander">Commander, Estrin, Thomas and Lingineni (2026)</a>, the main peer-reviewed study, find that concentration within narrowly defined industries fell between 2000 and 2020, while markups rose after 2013 and business groups' revenue grew relative to GDP. The two findings fit together: a group can hold modest shares in many markets and still weigh more in the economy as a whole. That is close to what Part 1 finds for Adani.</p>
+<p><a href="#ref-commander">Commander, Estrin, Thomas and Lingineni (2026)</a>, the main peer-reviewed study, find that concentration within narrowly defined industries fell between 2000 and 2020, while markups rose after 2013 and business groups' revenue grew relative to GDP. The two findings fit together. A group can hold modest shares in many markets and still weigh more in the economy as a whole. That is close to what Part 1 finds for Adani.</p>
 <p><a href="#ref-dasgupta">Dasgupta and Jayadev (2025)</a> are the only source found that reports the groups separately, and on assets they put Reliance at 11.3% and Adani at 2.5%. Their paper is a working paper and has not been peer reviewed. An earlier IMF study, <a href="#ref-wnm">Walton, Nath and Mody (2011)</a>, found little sign before about 2010 that Indian firms profited from product-market power, which places the rise these studies describe in the last decade. Markup estimates of the kind Acharya uses come from <a href="#ref-deu">De Loecker, Eeckhout and Unger (2020)</a>; <a href="#ref-dlgkp">De Loecker and co-authors (2016)</a> show, with Indian data, that markups can rise when costs fall and prices do not follow, so a rise in markups is a reason to investigate and does not by itself show market power.</p></section>''')
     sec.append(f'''<section id="reading" class="paper-sec"><h2>7. How to read this</h2>
-<p>The analytic position of this paper is that concentration should be measured market by market, on official totals, before it is argued about. On that measure, the picture is of two different kinds of business house. Reliance holds large shares in a few markets that households pay into every month: telephone service, fuel and, by its own account, retail. Adani holds large minority positions across physical infrastructure: ports, airports, power plants, transmission lines, coal mines and cement, much of it infrastructure the state once built and ran, or now allocates through licences, concessions and auctions.</p>
-<p>The second pattern is the reason Parts 2 and 3 exist. A share built by acquisition and by winning concessions raises different questions from one built by taking customers from rivals: questions about the terms on which public assets were transferred, the competitive bidding that allocated them, and the lending that paid for them. Part 1 establishes how large the positions are. It does not say how they were obtained, and nothing here should be read as a finding about that.</p></section>''')
+<p>The analytic position of this paper is that concentration should be measured market by market, on official totals, before it is argued about. On that measure, the picture is of two different kinds of business house. Reliance holds large shares in a few markets that households pay into every month, namely telephone service, fuel and, by its own account, retail. Adani holds large minority positions in physical infrastructure, in ports, airports, power plants, transmission lines, coal mines and cement, much of it infrastructure the state once built and ran, or now allocates through licences, concessions and auctions.</p>
+<p>The second pattern is the reason Parts 2 and 3 exist. A share built by acquisition and by winning concessions raises different questions from one built by taking customers from rivals. They are questions about the terms on which public assets were transferred, the competitive bidding that allocated them, and the lending that paid for them. Part 1 establishes how large the positions are. It does not say how they were obtained, and nothing here should be read as a finding about that.</p></section>''')
     sec.append('''<section id="limits" class="paper-sec"><h2>8. Limits and next steps</h2>
 <ul>
 <li>The Competition Commission's detailed orders on the Reliance-Disney combination, the Holcim, Sanghi, Penna and Orient cement acquisitions, and the 2017 complaint against Jio could not be retrieved from outside India. They hold the Commission's own market definitions and shares and will be added.</li>
@@ -763,7 +763,7 @@ def paper_page():
 <p>Continue to <a href="part-2/">Part 2, on how the assets were obtained</a>, and <a href="part-3/">Part 3, on finance and the legal record</a>. Corrections are welcome on <a href="https://github.com/Varnasr/industry-conglomerates-database/issues">GitHub</a>.</p></section>''')
     refs = "".join(f'<li id="ref-{k}">{t} <a href="{E(u)}" rel="noopener">{E(u)}</a></li>' for k, t, u in REFERENCES)
     sec.append(f'<section id="refs" class="paper-sec"><h2>References</h2><ol class="refs">{refs}</ol><p class="note">Data sources for each figure are listed under its chart and, row by row, in the <a href="../data/paper/">data tables</a>.</p></section>')
-    return page("../", "paper/", "Paper: How Much of the Economy Do Adani and Ambani Hold? | ImpactMojo",
+    return page("../", "paper/", "How much of the economy do Adani and Ambani hold? Part 1 | ImpactMojo",
                 "Part 1 of a working paper measuring the Adani and Reliance groups' shares of India's ports, airports, power, telecom, refining, cement and city gas on official totals.",
                 "\n".join(sec))
 
@@ -828,10 +828,10 @@ def series_csv():
 def outputs():
     out = {ROOT / "paper" / "index.html": paper_page(),
            ROOT / "findings" / "index.html": findings_index(),
-           ROOT / "paper" / "part-2" / "index.html": page("../../", "paper/", "Paper, Part 2: Routes to the State | Adani and Ambani | ImpactMojo",
+           ROOT / "paper" / "part-2" / "index.html": page("../../", "paper/", "How the assets were obtained, Part 2 | Adani and Ambani | ImpactMojo",
                 "Part 2 of a working paper: how the Adani and Reliance groups obtained their assets, and what auditors, regulators and courts recorded.",
                 PP.part2_body(CH, Chart)),
-           ROOT / "paper" / "part-3" / "index.html": page("../../", "paper/", "Paper, Part 3: Finance and Risk | Adani and Ambani | ImpactMojo",
+           ROOT / "paper" / "part-3" / "index.html": page("../../", "paper/", "Finance and risk, Part 3 | Adani and Ambani | ImpactMojo",
                 "Part 3 of a working paper: debt, lenders, pledged shares, and the regulatory and court record on the Adani and Reliance groups.",
                 PP.part3_body(CH, Chart)),
            ROOT / "data" / "paper" / "index.html": data_page(),
