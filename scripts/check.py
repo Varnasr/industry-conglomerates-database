@@ -122,13 +122,16 @@ def _covers_usage():
 check("the CSP allows everything the page actually loads", _covers_usage)
 
 
+PAGES = sorted(p for p in ROOT.rglob("*.html") if ".git" not in p.parts and "node_modules" not in p.parts)
+
+
 def _every_page_covered():
     """The header governs every page, not just index.html. Checking only the
     landing page let the CSP be tightened in September 2026 while both map
     pages still loaded Leaflet from unpkg.com and tiles from carto: the maps
     were blank in production, with nothing but a console message to show it."""
     blocked = []
-    for page in sorted(ROOT.glob("*.html")):
+    for page in PAGES:
         text = page.read_text(encoding="utf-8")
         used = [
             ("script-src", origins(re.findall(r'<script[^>]+src="([^"]+)"', text))),
@@ -144,7 +147,7 @@ def _every_page_covered():
                 if origin not in allowed:
                     blocked.append(f"{page.name} {directive}: {origin}")
     assert not blocked, "loaded but not allowed by the header CSP: " + ", ".join(blocked)
-    return f"{len(list(ROOT.glob('*.html')))} pages, map tiles included"
+    return f"{len(PAGES)} pages, map tiles included"
 check("the header CSP allows what every page loads", _every_page_covered)
 
 
@@ -209,6 +212,39 @@ def _map_pages_match_csv():
     assert out.returncode == 0, out.stdout.strip() or out.stderr.strip()
     return out.stdout.strip().removeprefix("PASS - ")
 check("every page matches adani_database.csv", _map_pages_match_csv)
+
+
+def _paper_matches_data():
+    """The paper and its finding pages print numbers computed from data/paper.
+    A corrected row that does not reach them leaves the paper saying what the
+    data no longer says."""
+    import subprocess
+    out = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_paper.py"), "--check"],
+                         capture_output=True, text=True)
+    assert out.returncode == 0, out.stdout.strip() or out.stderr.strip()
+    return out.stdout.strip().removeprefix("PASS - ")
+check("the paper matches data/paper", _paper_matches_data)
+
+
+def _paper_rows_name_a_source():
+    """Every row in the paper's tables names a document, and every row that is
+    not a calculation says where in it the figure is: a web address, a page or
+    a table. A figure with no source is the thing this site exists not to
+    publish."""
+    import csv
+    bad = []
+    for f in sorted((ROOT / "data" / "paper").glob("*.csv")):
+        if f.name == "series.csv":
+            continue
+        with f.open(newline="", encoding="utf-8") as fh:
+            for i, r in enumerate(csv.DictReader(fh), 2):
+                derived = r["source_title"].lower().startswith("derived")
+                located = r["url"].strip().startswith("http") or r["locator"].strip()
+                if not r["source_title"].strip() or not (derived or located):
+                    bad.append(f"{f.name}:{i}")
+    assert not bad, f"{len(bad)} rows name no document, or no address or page for it, e.g. {bad[:5]}"
+    return "every row names its document, and every non-derived row an address or page"
+check("every row in data/paper names its source", _paper_rows_name_a_source)
 
 
 def _rows_carry_their_check():
