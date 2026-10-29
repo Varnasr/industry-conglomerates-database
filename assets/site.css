@@ -47,20 +47,69 @@ p a, li a, td a.src, .note a { color: var(--reliance); text-underline-offset: 2p
 }
 
 /* Header */
-.top { border-bottom: 1px solid var(--line); background: var(--paper); position: sticky; top: 0; z-index: 10; }
+.top { border-bottom: 1px solid var(--line); background: var(--paper); position: sticky; top: 0; z-index: 1100; }
 .top .wrap { display: flex; align-items: center; gap: 16px; min-height: 60px; flex-wrap: wrap; }
 .brand { font: 600 15px/1.2 var(--sans); text-decoration: none; display: flex; align-items: center; gap: 10px; }
 .brand-mark { width: 26px; height: 26px; display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
 .brand-mark i { display: block; border-radius: 2px; }
 .brand-mark i:nth-child(1), .brand-mark i:nth-child(4) { background: var(--adani); }
 .brand-mark i:nth-child(2), .brand-mark i:nth-child(3) { background: var(--reliance); }
-.nav { display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; align-items: center; }
-.nav a, .nav button {
+.top .wrap { flex-wrap: nowrap; gap: 12px; position: relative; }
+.brand { flex: none; }
+.nav { display: flex; gap: 2px; margin-left: auto; align-items: center; }
+.nav a {
   font: 500 14px/1 var(--sans); color: var(--ink-2); text-decoration: none;
-  padding: 9px 12px; border-radius: 6px; border: 0; background: none; cursor: pointer;
+  padding: 10px 12px; border-radius: 6px;
 }
-.nav a:hover, .nav button:hover { background: var(--sunk); color: var(--ink); }
+.nav a:hover { background: var(--sunk); color: var(--ink); }
 .nav a[aria-current="page"] { color: var(--ink); background: var(--sunk); }
+.tools { display: flex; gap: 6px; align-items: center; flex: none; }
+.tool {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--card); color: var(--ink);
+  font: 500 14px/1 var(--sans); cursor: pointer;
+}
+.tool:hover { border-color: var(--ink-3); }
+.tool svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.tool .i-moon { display: none; }
+.tool[aria-pressed="true"] .i-sun { display: none; }
+.tool[aria-pressed="true"] .i-moon { display: block; }
+.menu-btn { display: none; }
+
+/* Display menu */
+.display-panel {
+  position: absolute; right: max(20px, env(safe-area-inset-right, 0px)); top: calc(100% + 8px); z-index: 1200;
+  width: min(360px, calc(100vw - 32px)); background: var(--card); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .18);
+}
+.display-panel[hidden] { display: none; }
+.dp-row { display: grid; gap: 8px; }
+.dp-l { font: 600 13px var(--sans); color: var(--ink-2); }
+.dp-note { margin: 0; font-size: 13px; color: var(--ink-3); }
+.dp-done { justify-self: end; font: 600 14px var(--sans); padding: 10px 16px; border-radius: 8px; border: 0; background: var(--ink); color: var(--paper); cursor: pointer; }
+.seg { display: flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--card); }
+.seg button { flex: 1; border: 0; background: none; color: var(--ink-2); font: 500 13px/1.2 var(--sans); padding: 10px 6px; min-height: 40px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
+
+/* Reading font. OpenDyslexic (SIL OFL 1.1, licence in assets/fonts) downloads
+   only once a reader turns it on, because only these rules use the family.
+   The spacing is the half with the better evidence: Zorzi et al., PNAS 109(28),
+   2012, on letter spacing; the British Dyslexia Association style guide on
+   line and word spacing. */
+@font-face { font-family: "OpenDyslexic"; font-weight: 400; font-style: normal; font-display: swap; src: url("fonts/opendyslexic-400.woff2") format("woff2"); }
+@font-face { font-family: "OpenDyslexic"; font-weight: 700; font-style: normal; font-display: swap; src: url("fonts/opendyslexic-700.woff2") format("woff2"); }
+@font-face { font-family: "OpenDyslexic"; font-weight: 400; font-style: italic; font-display: swap; src: url("fonts/opendyslexic-400-italic.woff2") format("woff2"); }
+html.dyslexic-font, html.dyslexic-font body, html.dyslexic-font h1, html.dyslexic-font h2, html.dyslexic-font h3,
+html.dyslexic-font button, html.dyslexic-font input, html.dyslexic-font select, html.dyslexic-font .eyebrow,
+html.dyslexic-font .leaflet-container {
+  font-family: "OpenDyslexic", Verdana, Tahoma, sans-serif !important;
+}
+html.dyslexic-font p, html.dyslexic-font li, html.dyslexic-font dd, html.dyslexic-font .lede {
+  line-height: 1.7; letter-spacing: .04em; word-spacing: .16em; text-align: left;
+}
+html.dyslexic-font .eyebrow { letter-spacing: .04em; text-transform: none; }
 
 /* Type */
 .eyebrow { font: 600 12px/1.2 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
@@ -164,11 +213,32 @@ a.card:hover { border-color: var(--ink-3); }
 @media (max-width: 720px) {
   .controls { grid-template-columns: 1fr 1fr; }
   .controls label:first-child { grid-column: 1 / -1; }
-  .nav { margin-left: 0; width: 100%; }
-  .top { position: static; }
+  .lede { font-size: 17px; }
+  .hero { padding-block: 40px 32px; }
   .row { scroll-margin-top: 8px; }
   .row > summary { grid-template-columns: 1fr; }
   .row > summary .chip { grid-column: 1; grid-row: auto; justify-self: start; }
   .row dl { grid-template-columns: 1fr; }
   section { padding-block: 40px; }
 }
+
+/* Phone and small tablet: the links fold behind Menu, the tools keep their icons. */
+@media (max-width: 760px) {
+  .top { position: sticky; }
+  .brand { font-size: 14px; min-width: 0; }
+  .tools { margin-left: auto; }
+  .tool { padding: 0; width: 40px; justify-content: center; }
+  .tool .tool-l { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .menu-btn { display: inline-flex; }
+  .nav {
+    display: none; position: absolute; left: 0; right: 0; top: 100%; z-index: 1150;
+    flex-direction: column; align-items: stretch; gap: 0; margin: 0;
+    background: var(--paper); border-bottom: 1px solid var(--line);
+    padding: 8px max(16px, env(safe-area-inset-left, 0px)) 12px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, .12);
+  }
+  .nav.open { display: flex; }
+  .nav a { padding: 14px 12px; font-size: 16px; }
+  .display-panel { right: 16px; }
+}
+@media (max-width: 360px) { .brand-mark { display: none; } }
