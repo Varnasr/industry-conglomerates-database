@@ -1,4 +1,4 @@
-# India's largest business houses: Adani and Ambani
+# Adani and Ambani, India's largest business houses
 
 Live at **https://industrygroups.impactmojo.in/**
 
