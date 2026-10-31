@@ -825,6 +825,24 @@ def series_csv():
     return buf.getvalue()
 
 
+FRONT = ["ports", "airports", "mobile", "refining", "coal-power", "renewables"]
+
+
+def front_findings(path):
+    """The findings block on the landing page, between its markers."""
+    by = {f["slug"]: f for f in FINDINGS}
+    items = "".join(
+        f'\n    <li><a class="card" href="findings/{s}/"><span class="eyebrow">{E(by[s]["eyebrow"])}</span><h3 class="h3">{E(by[s]["title"])}</h3></a></li>'
+        for s in FRONT)
+    block = (f'<section class="stack" aria-labelledby="h-finds">\n  <h2 id="h-finds">What the record shows</h2>\n'
+             f'  <ol class="finding-list">{items}\n  </ol>\n'
+             f'  <p><a class="btn" href="findings/">All {len(FINDINGS)} findings</a></p>\n</section>\n')
+    text = path.read_text(encoding="utf-8")
+    a, b = "<!--findings:start-->\n", "<!--findings:end-->"
+    i = text.index(a) + len(a)
+    return text[:i] + block + text[text.index(b):]
+
+
 def outputs():
     out = {ROOT / "paper" / "index.html": paper_page(),
            ROOT / "findings" / "index.html": findings_index(),
@@ -835,7 +853,8 @@ def outputs():
                 "Part 3 of a working paper: debt, lenders, pledged shares, and the regulatory and court record on the Adani and Reliance groups.",
                 PP.part3_body(CH, Chart)),
            ROOT / "data" / "paper" / "index.html": data_page(),
-           ROOT / "data" / "paper" / "series.csv": series_csv()}
+           ROOT / "data" / "paper" / "series.csv": series_csv(),
+           ROOT / "index.html": front_findings(ROOT / "index.html")}
     for i, f in enumerate(FINDINGS):
         out[ROOT / "findings" / f["slug"] / "index.html"] = finding_page(f, i)
     return out

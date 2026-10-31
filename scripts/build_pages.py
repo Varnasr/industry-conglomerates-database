@@ -110,29 +110,6 @@ def stats_block(data):
                 '      <div class="meta">Largest: ' + " · ".join(f"{e(s)} {n}" for s, n in top) + '</div>',
                 '    </div>']
     out += ['  </div>', '</section>', '']
-    order = [("Verified", "ok", "Verified"), ("Verified with corrections", "fix", "Verified with corrections"),
-             ("Partly verified", "part", "Partly verified"), ("Unverified", "none", "Not yet verified")]
-    c = collections.Counter(r["Verification_Status"] for r in data)
-    total = len(data)
-    label = ", ".join(f"{c[k]} {lab.lower()}" for k, _, lab in order)
-    out += ['<section class="stack" aria-labelledby="h-check">',
-            '  <h2 id="h-check">How far each project has been checked</h2>',
-            f'  <p class="lede">All {total} rows were checked against documents on 28 October 2026. The check removed 58 rows that were duplicates or not these groups\' projects.</p>',
-            f'  <div class="bar" role="img" aria-label="{label}">' + "".join(
-                f'<span class="s-{k}" style="width:{100 * c[s] / total:.4f}%"></span>' for s, k, _ in order) + '</div>',
-            '  <div class="key">' + "".join(f'<span><i class="sw s-{k}"></i>{lab} <b>{c[s]}</b></span>' for s, k, lab in order) + '</div>',
-            '</section>', '']
-    all_urls = [u for r in data for u in urls(r)]
-    hosts = collections.Counter(re.sub(r"^www\.", "", re.match(r"https?://([^/]+)", u).group(1)) for u in all_urls if re.match(r"https?://", u))
-    cited = sum(1 for r in data if urls(r))
-    out += ['<section class="stack" aria-labelledby="h-sources">',
-            '  <h2 id="h-sources">Where the information comes from</h2>',
-            '  <div class="cols">', '    <div class="stack">',
-            f'      <p>The {total} projects cite {len(all_urls)} sources on {len(hosts)} websites. {cited} projects cite at least one. Each source is listed beside its project on the <a href="projects.html">projects page</a> and in the map\'s pop-ups.</p>',
-            '      <p>Most citations are the companies\' own pages and filings, regulators such as the Petroleum and Natural Gas Regulatory Board, and news reports. A company page shows what the company says it owns or runs. A regulator\'s record or a court document is stronger evidence where one exists.</p>',
-            '    </div>', '    <div>', '      <div class="eyebrow" style="margin-bottom:10px">Most cited websites</div>',
-            '      <ol class="domains">' + "".join(f"<li><span>{e(h)}</span><span>{n}</span></li>" for h, n in hosts.most_common(10)) + '</ol>',
-            '    </div>', '  </div>', '</section>']
     return "\n".join(out) + "\n"
 
 
