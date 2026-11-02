@@ -171,6 +171,8 @@ a.card:hover { border-color: var(--ink-3); }
 .foot { border-top: 1px solid var(--line); padding-block: 28px; font-size: 14px; color: var(--ink-3); }
 .foot .wrap { display: flex; flex-wrap: wrap; gap: 8px 24px; }
 .foot a { color: var(--ink-2); }
+.foot .foot-contact { flex-basis: 100%; max-width: 46rem; margin: 0; line-height: 1.6; }
+.foot .foot-contact a { text-decoration: underline; text-underline-offset: 2px; }
 
 /* Status chip */
 .chip { display: inline-block; font: 600 12px/1.4 var(--sans); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
